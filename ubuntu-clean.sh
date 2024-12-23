@@ -1,5 +1,5 @@
 apt list --installed > installed.1st
-for pkg in bolt btrfs* containerd cryptsetup* dmeventd dmidecode dmsetup docker.io docker-doc docker-compose docker-compose-v2 lvm2 lxd* mdadm open-iscsi overlayroot podman-docker runc sg3-utils* thin-provisioning* wireless* xfsprogs; do sudo apt purge -y $pkg; done
+for pkg in bolt btrfs* containerd cryptsetup* dmeventd dmidecode dmsetup docker.io docker-doc docker-compose docker-compose-v2 lvm2 lxd* mdadm open-iscsi overlayroot podman-docker runc snap* sg3-utils* thin-provisioning* wireless* xfsprogs; do sudo apt purge -y $pkg; done
 apt autoremove --purge -y
 
 ---
