@@ -16,6 +16,7 @@ apt full-upgrade -y
 deluser lxd
 delgroup lxd
 groupadd docker
-useradd -mru 999 -s /bin/bash -g docker docker
-byobu-enable
+useradd -mru 988 -s /bin/bash -g docker docker
+cp -r /root/.ssh /home/docker/
+chown -R docker:docker /home/docker/.ssh
 reboot
