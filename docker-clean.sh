@@ -3,7 +3,7 @@ for pkg in aspell* bolt btrfs* containerd cryptsetup* dmeventd dmidecode dmsetup
 apt autoremove --purge -y
 apt update
 
-apt install -y byobu ca-certificates curl etckeeper
+apt install -y byobu ca-certificates curl etckeeper fail2ban
 apt update
 install -m 0755 -d /etc/apt/keyrings
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
