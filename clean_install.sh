@@ -49,6 +49,13 @@ echo \
 apt update
 apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 
-useradd -mNu 911 -g docker docker
+useradd -g docker -mNs /bin/bash -u 911 docker
+cp -r /root/.ssh /home/docker/
+chown -R docker:docker /home/docker/.ssh
+
+sudo -nu docker byobu-enable
+sudo -nu docker echo "set -sg escape-time 50" > /home/docker/.config/byobu/.tmux.conf
+
+curl -s https://raw.githubusercontent.com/JOduMonT/ubuntu/refs/heads/main/etc/ssh/sshd_config -o /etc/ssh/sshd_config
 
 reboot
