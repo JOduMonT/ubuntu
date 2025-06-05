@@ -1,0 +1,190 @@
+# SSH Daemon Configuration File
+# Based on DevSec SSH Baseline: https://github.com/dev-sec/ssh-baseline
+# This configuration follows the hardening guidelines from the DevSec project
+
+# ====================
+# NETWORK SETTINGS
+# ====================
+
+# Listen on all available addresses
+#Port 22
+#AddressFamily any
+#ListenAddress 0.0.0.0
+#ListenAddress ::
+
+# ====================
+# AUTHENTICATION
+# ====================
+
+# Use only SSH Protocol 2 (for older OpenSSH versions < 7.6)
+# Note: Protocol directive is deprecated in newer versions as only v2 is supported
+Protocol 2
+
+# Root login configuration
+PermitRootLogin no
+
+# Password and authentication settings
+PasswordAuthentication no
+PermitEmptyPasswords no
+ChallengeResponseAuthentication no
+KbdInteractiveAuthentication no
+UsePAM yes
+
+# Public key authentication
+PubkeyAuthentication yes
+AuthorizedKeysFile .ssh/authorized_keys
+
+# Maximum authentication attempts
+MaxAuthTries 3
+
+# Authentication timeout
+LoginGraceTime 60
+
+# Maximum sessions per connection
+MaxSessions 2
+
+# ====================
+# CRYPTOGRAPHIC ALGORITHMS
+# ====================
+
+# Secure Ciphers (based on OpenSSH version >= 6.6)
+# These are the approved ciphers from dev-sec ssh-baseline
+Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes192-ctr,aes128-ctr
+
+# Secure Key Exchange Algorithms (based on OpenSSH version >= 8.5)
+# These provide forward secrecy and quantum resistance
+KexAlgorithms sntrup761x25519-sha512@openssh.com,curve25519-sha256@libssh.org,diffie-hellman-group-exchange-sha256
+
+# Secure Message Authentication Codes (based on OpenSSH version >= 6.6)
+# ETM (Encrypt-then-MAC) algorithms are preferred for security
+MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,umac-128-etm@openssh.com,hmac-sha2-512,hmac-sha2-256
+
+# Host Key Algorithms (modern, secure algorithms only)
+HostKeyAlgorithms ssh-ed25519,ssh-ed25519-cert-v01@openssh.com,rsa-sha2-512,rsa-sha2-256
+
+# Public Key Accepted Types
+PubkeyAcceptedKeyTypes ssh-ed25519,ssh-ed25519-cert-v01@openssh.com,rsa-sha2-512,rsa-sha2-256
+
+# ====================
+# HOST KEYS
+# ====================
+
+# Use only secure host keys
+HostKey /etc/ssh/ssh_host_ed25519_key
+HostKey /etc/ssh/ssh_host_rsa_key
+
+# ====================
+# SECURITY SETTINGS
+# ====================
+
+# Privilege separation for security
+UsePrivilegeSeparation sandbox
+
+# Strict mode checking
+StrictModes yes
+
+# Logging configuration
+SyslogFacility AUTH
+LogLevel INFO
+
+# Disable potentially dangerous features
+AllowAgentForwarding no
+AllowTcpForwarding no
+GatewayPorts no
+X11Forwarding no
+PermitTunnel no
+
+# Disable unused authentication methods
+HostbasedAuthentication no
+IgnoreRhosts yes
+RhostsRSAAuthentication no
+
+# Client alive settings (prevents hanging connections)
+ClientAliveInterval 300
+ClientAliveCountMax 2
+
+# TCP settings
+TCPKeepAlive no
+
+# User environment restrictions
+PermitUserEnvironment no
+
+# Compression (disabled for security)
+Compression no
+
+# ====================
+# ACCESS CONTROL
+# ====================
+
+# Maximum startups to prevent DoS
+MaxStartups 10:30:100
+
+# Banner (optional - uncomment and customize as needed)
+#Banner /etc/ssh/banner
+
+# Allow specific users/groups (customize as needed)
+# Examples:
+# AllowUsers admin@192.168.1.0/24 user@10.0.0.0/8
+# AllowGroups ssh-users wheel
+# DenyUsers root
+# DenyGroups root
+
+# ====================
+# SFTP CONFIGURATION
+# ====================
+
+# Secure SFTP subsystem with chroot
+Subsystem sftp internal-sftp
+
+# Example SFTP chroot configuration (uncomment and customize as needed)
+#Match Group sftponly
+#    ChrootDirectory /home/chroot/%u
+#    ForceCommand internal-sftp
+#    AllowTcpForwarding no
+#    AllowAgentForwarding no
+#    X11Forwarding no
+
+# ====================
+# ADDITIONAL SECURITY
+# ====================
+
+# Print last log
+PrintLastLog yes
+
+# Print MOTD
+PrintMotd no
+
+# Use DNS for hostname resolution (can be disabled for performance)
+UseDNS no
+
+# Version string (customize as needed for security through obscurity)
+VersionAddendum none
+
+# Disable deprecated algorithms and features
+# Note: Many of these are already disabled by default in modern OpenSSH
+
+# For older OpenSSH versions, explicitly disable weak algorithms:
+# RekeyLimit 1G 1h
+
+# ====================
+# PERFORMANCE TUNING
+# ====================
+
+# Connection multiplexing (can be enabled if needed)
+# MaxSessions already set above
+
+# ====================
+# COMPLIANCE NOTES
+# ====================
+
+# This configuration follows the DevSec SSH Baseline requirements:
+# - Uses only secure ciphers, KEX algorithms, and MACs
+# - Disables weak authentication methods
+# - Enables proper logging and monitoring
+# - Implements principle of least privilege
+# - Follows current cryptographic best practices
+#
+# For specific compliance requirements, additional modifications may be needed.
+# Always test configuration changes in a non-production environment first.
+
+# End of configuration
