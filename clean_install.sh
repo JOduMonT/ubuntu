@@ -1,7 +1,11 @@
+# LIST installed packages
 apt list --installed > installed.1st
 apt update
+
+# INSTALL etckeeper
 apt install -y etckeeper
 
+# PURGE
 apt purge \
   apport* \
   btrfs-progs \
@@ -36,8 +40,10 @@ apt purge \
   whoopsie
 apt autoremove --purge -y
 
+# UPGRADE
 apt dist-upgrade -y
 
+# INSTALL Docker
 apt install ca-certificates curl
 install -m 0755 -d /etc/apt/keyrings
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
@@ -49,13 +55,22 @@ echo \
 apt update
 apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 
+# ADD USER Docker
 useradd -g docker -mNs /bin/bash -u 911 docker
 cp -r /root/.ssh /home/docker/
 chown -R docker:docker /home/docker/.ssh
 
+# ENABLE BYOBU for Docker user
 sudo -nu docker byobu-enable
 sudo -nu docker echo "set -sg escape-time 50" > /home/docker/.config/byobu/.tmux.conf
 
+# SECURE ssh daemon
 curl -s https://raw.githubusercontent.com/JOduMonT/ubuntu/refs/heads/main/etc/ssh/sshd_config -o /etc/ssh/sshd_config
 
+# INSTALL ubuntu advantage (Expanded Security Maintenance + Livepatch service)
+## https://ubuntu.com/pro/tutorial
+## https://ubuntu.com/pro/dashboard
+apt install -y ubuntu-advantage-tools
+
+# REBOOT
 reboot
