@@ -7,5 +7,5 @@ apt install -y nodejs
 
 npm install -g npm@latest
 
-chown -R root:sudo /usr/bin/ /usr/lib/node_modules/
-chmod -R 775 /usr/bin/ /usr/lib/node_modules/
+chown root:sudo /usr/bin/ /usr/lib/node_modules/
+chmod 775 /usr/bin/ /usr/lib/node_modules/
