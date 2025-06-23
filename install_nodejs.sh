@@ -4,3 +4,4 @@
 
 curl -sL https://deb.nodesource.com/setup_24.x | bash -
 apt install -y nodejs
+npm install -g npm@latest
