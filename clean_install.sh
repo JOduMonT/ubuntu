@@ -6,7 +6,7 @@ apt update
 apt install -y etckeeper
 
 # PURGE
-apt purge \
+apt purge -y \
   apport* \
   btrfs-progs \
   containerd \
