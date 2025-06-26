@@ -1,0 +1,17 @@
+[Unit]
+Description=Kopia headless server
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/kopia server start \
+  --address=0.0.0.0:51515 \
+  --insecure \
+  --no-ui \
+  --server-username=kopia \
+  --server-password=YOUR_PASSWORD
+Restart=on-failure
+User=root
+
+[Install]
+WantedBy=multi-user.target
