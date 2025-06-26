@@ -8,3 +8,12 @@ echo 'deb [signed-by=/usr/share/keyrings/cloudflare-main.gpg] https://pkg.cloudf
 # install cloudflared
 sudo apt-get update
 sudo apt install -y cloudflared
+
+# What Next ?
+# 1. create a tunnel: https://one.dash.cloudflare.com/
+#    - go to Network -> Tunnels
+# 2. connect the tunnel
+#    - sudo cloudflared service install YOUR_TOKEN
+# 3. manage the access
+#    - go to Access -> Applications
+#    - go to Access -> Policies
