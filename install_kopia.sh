@@ -6,3 +6,4 @@ sudo apt install -y kopia kopia-ui
 
 # config as service: sudo wget -O /etc/systemd/system/kopia-server.service https://raw.githubusercontent.com/JOduMonT/ubuntu/refs/heads/main/etc/systemd/system/kopia-server.service
 # files to exclude: https://raw.githubusercontent.com/JOduMonT/home-exclusions/refs/heads/master/rsync-homedir-excludes.txt
+# use resend to send notification: https://resend.com
