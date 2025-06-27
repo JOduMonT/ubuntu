@@ -11,3 +11,7 @@ mkdir gunbot
 cd gunbot
 wget https://gunthy.org/downloads/gunthy_linux.zip
 unzip gunthy_linux.zip
+
+# monitoring
+# create account: https://pm2.io
+# link gunbot with it
