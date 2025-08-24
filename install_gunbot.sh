@@ -1,5 +1,8 @@
-## 
-sudo apt install -y unzip
+scripts=("install_tools.sh" "clean_install.sh" "install_nodejs.sh")
+for script in $scripts; do curl -fsSL "https://raw.githubusercontent.com/JOduMonT/ubuntu/refs/heads/main/$script"|bash; done
+
+packages=("unzip")
+for package in $packages; do sudo apt install -y $package; done
 
 ## Install PM2
 ### ensure to install nodejs before: https://raw.githubusercontent.com/JOduMonT/ubuntu/refs/heads/main/install_nodejs.sh
