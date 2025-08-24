@@ -9,7 +9,7 @@ curl -fsSL https://pkg.cloudflare.com/cloudflare-main.gpg | tee /usr/share/keyri
 echo 'deb [signed-by=/usr/share/keyrings/cloudflare-main.gpg] https://pkg.cloudflare.com/cloudflared any main' | tee /etc/apt/sources.list.d/cloudflared.list
 
 # install cloudflared
-apt-get update
+apt update
 apt install -y cloudflared
 
 # What Next ?
