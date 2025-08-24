@@ -1,11 +1,3 @@
-# LIST installed packages
-apt list --installed > installed.1st
-apt update
-
-# INSTALL etckeeper
-apt install -y etckeeper
-
-# PURGE
 apt purge -y \
   apport* \
   btrfs-progs \
@@ -45,6 +37,3 @@ apt purge -y \
   xfsprogs \
   whoopsie
 apt autoremove --purge -y
-
-# UPGRADE
-apt dist-upgrade -y
