@@ -21,7 +21,7 @@
 Protocol 2
 
 # Root login configuration
-PermitRootLogin no
+PermitRootLogin prohibit-password
 
 # Password and authentication settings
 PasswordAuthentication no
