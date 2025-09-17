@@ -1,0 +1,58 @@
+# see https://docs.searxng.org/admin/settings/settings.html#settings-use-default-settings
+use_default_settings: true
+
+server:
+  limiter: true
+  image_proxy: true
+
+valkey:
+  url: valkey://localhost:6379/0
+
+# Add outgoing configuration for better behavior
+outgoing:
+  request_timeout: 8.0
+  max_request_timeout: 15.0
+  retries: 2
+  pool_maxsize: 5
+  pool_connections: 50
+  useragent_suffix: ""
+  enable_http2: true
+
+search:
+  formats:
+    - html
+    - json
+#    - csv
+#    - rss
+  suspended_times:
+    SearxEngineAccessDenied: 3600
+    SearxEngineCaptcha: 1800
+    SearxEngineTooManyRequests: 600
+    cf_SearxEngineCaptcha: 7200
+    cf_SearxEngineAccessDenied: 3600
+    recaptcha_SearxEngineCaptcha: 3600
+
+ui:
+  static_use_hash: true
+
+engines:
+  - name: duckduckgo
+    engine: duckduckgo
+    timeout: 10.0
+    disabled: false
+  - name: wikipedia
+    engine: wikipedia  
+    timeout: 12.0
+    disabled: false
+  - name: google
+    disabled: true  # Keep disabled to avoid blocks
+  - name: startpage
+    disabled: false
+  - name: searx
+    disabled: false
+  - name: yandex
+    disabled: false
+
+plugins:
+  searx.plugins.oa_doi_rewrite.SXNGPlugin:
+    active: true
