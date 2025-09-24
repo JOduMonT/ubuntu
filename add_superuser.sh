@@ -1,5 +1,3 @@
-USER=docker
-
 # ADD SUPER USER
 useradd -g sudo -mNs /bin/bash $USER
 cp -r /root/.ssh /home/$USER/
