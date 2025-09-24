@@ -7,3 +7,7 @@ curl -fsSL https://raw.githubusercontent.com/JOduMonT/ubuntu/refs/heads/main/sec
 
 curl -sfL https://get.k3s.io | sh -
 curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+
+# ADD USER Docker
+USER=k3s
+curl -fsSL "https://raw.githubusercontent.com/JOduMonT/ubuntu/refs/heads/main/add_superuser.sh|bash
