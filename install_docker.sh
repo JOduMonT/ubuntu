@@ -14,6 +14,5 @@ apt update
 apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 
 # ADD USER Docker
-useradd -g docker -mNs /bin/bash -u 911 docker
-cp -r /root/.ssh /home/docker/
-chown -R docker:docker /home/docker/.ssh
+USER=docker
+curl -fsSL "https://raw.githubusercontent.com/JOduMonT/ubuntu/refs/heads/main/add_superuser.sh|bash
