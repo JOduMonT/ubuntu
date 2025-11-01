@@ -4,3 +4,7 @@
 apt update
 apt install -y ubuntu-advantage-tools
 apt dist-upgrade -y
+
+## https://ubuntu.com/tutorials/using-the-ubuntu-pro-client-to-enable-fips#4-enabling-fips-crypto-modules
+# pro enable fips-updates
+# pro enable usg
