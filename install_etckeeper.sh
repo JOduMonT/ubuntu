@@ -10,5 +10,6 @@ sed -i 's/^PUSH_REMOTE=""/PUSH_REMOTE="origin"/g' /etc/etckeeper/etckeeper.conf
 exit 0
 
 cd /etc
-git remove add origin ${REPO}
+git remote add origin ${REPO}
+git branch -M main
 git push -u origin main
