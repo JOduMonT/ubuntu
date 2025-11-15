@@ -4,6 +4,7 @@ REPO="" # Use a Private Repo
 USERNAME="" # Your GitHub username
 PASSWORD="" # [Use a Classic Token as Password](https://github.com/settings/tokens)
 
+apt update
 apt install -y etckeeper
 sed -i 's/^PUSH_REMOTE=""/PUSH_REMOTE="origin"/g' /etc/etckeeper/etckeeper.conf
 
