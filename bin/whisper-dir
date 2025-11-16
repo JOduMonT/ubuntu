@@ -1,132 +1,86 @@
 #!/bin/bash
 
-# Pure Bash Whisper CUDA Batch Transcription
-# Transcribes all MP3 files recursively using whisper CLI
+# Whisper CUDA Transcription - Obsidian/Markdown with Full Path
 
-# Configuration
 MODEL_SIZE="${2:-turbo}"
 LANGUAGE="${3:-en}"
-OUTPUT_FORMAT="${4:-txt}"  # txt, vtt, srt, tsv, json, or all
-OUTPUT_DIR="transcriptions"
 DEVICE="cuda"
 
-# Check arguments
 if [ $# -eq 0 ]; then
-    echo "Usage: $0 <directory> [model_size] [language] [output_format]"
-    echo ""
-    echo "Arguments:"
-    echo "  directory      - Directory containing MP3 files"
-    echo "  model_size     - tiny, base, small, medium, large, turbo (default: base)"
-    echo "  language       - Language code: en, es, fr, etc. (default: en)"
-    echo "  output_format  - txt, vtt, srt, tsv, json, all (default: txt)"
-    echo ""
-    echo "Output formats:"
-    echo "  txt   - Plain text transcript"
-    echo "  vtt   - WebVTT format (timed subtitles for video)"
-    echo "  srt   - SubRip format (timed subtitles)"
-    echo "  tsv   - Tab-separated values (segments with timestamps)"
-    echo "  json  - JSON with detailed metadata"
-    echo "  all   - Generate all formats"
-    echo ""
-    echo "Example:"
-    echo "  $0 ./audio base en srt"
+    echo "Usage: $0 <directory> [model_size] [language]"
+    echo "Creates Markdown files with full source path and transcription content"
     exit 1
 fi
 
 SEARCH_DIR="$1"
 
-# Validate output format
-case "$OUTPUT_FORMAT" in
-    txt|vtt|srt|tsv|json|all)
-        ;;
-    *)
-        echo "Error: Invalid output format '$OUTPUT_FORMAT'"
-        echo "Valid formats: txt, vtt, srt, tsv, json, all"
-        exit 1
-        ;;
-esac
-
-mkdir -p "$OUTPUT_DIR"
-
-# Counter variables
 total=0
 success=0
-failed=0
 
 echo "================================================"
-echo "Whisper CUDA Batch Transcription"
+echo "Whisper → Obsidian Markdown Transcription"
 echo "================================================"
 echo "Search directory: $SEARCH_DIR"
 echo "Model: $MODEL_SIZE"
 echo "Language: $LANGUAGE"
-echo "Device: $DEVICE"
-echo "Output format: $OUTPUT_FORMAT"
-echo "Output directory: $OUTPUT_DIR"
 echo "================================================"
 echo ""
 
-# Find and process all MP3 files recursively
 while IFS= read -r -d '' mp3_file; do
     ((total++))
     
-    # Get relative path and create output structure
-    rel_path="${mp3_file#$SEARCH_DIR/}"
-    output_subdir="$OUTPUT_DIR/$(dirname "$rel_path")"
-    mkdir -p "$output_subdir"
-    
-    # Get filename without extension
+    # Get full absolute path
+    mp3_full_path=$(realpath "$mp3_file")
+    mp3_dir="$(dirname "$mp3_file")"
     filename=$(basename "$mp3_file" .mp3)
+    md_file="$mp3_dir/$filename.md"
+    temp_txt="$mp3_dir/$filename.txt"
     
-    echo "[$total] Processing: $rel_path"
+    echo "[$total] Processing: $mp3_full_path"
     
-    # Run whisper CLI with specified output format
+    # Run whisper to generate plain text
     if whisper "$mp3_file" \
         --model "$MODEL_SIZE" \
         --language "$LANGUAGE" \
         --device "$DEVICE" \
-        --output_dir "$output_subdir" \
-        --output_format "$OUTPUT_FORMAT" \
+        --output_dir "$mp3_dir" \
+        --output_format txt \
         --fp16 True \
         --verbose False; then
         
-        ((success++))
+        # Get file metadata
+        filesize=$(du -h "$mp3_file" | cut -f1)
+        created_date=$(date -r "$mp3_file" "+%Y-%m-%d")
+        transcribed_date=$(date "+%Y-%m-%d %H:%M")
         
-        # Show which files were created
-        case "$OUTPUT_FORMAT" in
-            txt)
-                echo "✓ Created: $filename.txt"
-                ;;
-            vtt)
-                echo "✓ Created: $filename.vtt"
-                ;;
-            srt)
-                echo "✓ Created: $filename.srt"
-                ;;
-            tsv)
-                echo "✓ Created: $filename.tsv"
-                ;;
-            json)
-                echo "✓ Created: $filename.json"
-                ;;
-            all)
-                echo "✓ Created: $filename.{txt,vtt,srt,tsv,json}"
-                ;;
-        esac
+        # Create Markdown file with frontmatter and full path
+        cat > "$md_file" << EOF
+---
+source_path: "$mp3_full_path"
+created: $created_date
+model: $MODEL_SIZE
+language: $LANGUAGE
+filesize: $filesize
+tags:
+  - transcription
+  - audio
+---
+$(cat "$temp_txt")
+EOF
+        
+        # Clean up temporary txt file
+        rm -f "$temp_txt"
+        
+        ((success++))
+        echo "✓ Created: $md_file"
     else
-        ((failed++))
-        echo "✗ Failed: $mp3_file"
+        echo "✗ Failed"
     fi
     
     echo ""
     
 done < <(find "$SEARCH_DIR" -type f -name "*.mp3" -print0)
 
-# Summary
 echo "================================================"
-echo "Transcription Complete"
+echo "Complete: $success/$total Markdown files created"
 echo "================================================"
-echo "Total files: $total"
-echo "Successful: $success"
-echo "Failed: $failed"
-echo "Output directory: $OUTPUT_DIR"
-echo "================================================
