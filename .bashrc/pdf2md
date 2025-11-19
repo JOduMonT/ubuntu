@@ -1,0 +1,5 @@
+
+## sudo apt install -y poppler-utils
+pdf2md() {
+  pdftotext "$1" "${1%.pdf}.md"
+}
