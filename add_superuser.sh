@@ -1,5 +1,5 @@
 # ADD SUPER USER
-USER=
+#USER=
 useradd -g users -mNs /bin/bash ${USER:-rescue}
 cp -r /root/.ssh /home/${USER:-rescue}/
 chown -R ${USER:-rescue}: /home/${USER:-rescue}/.ssh
