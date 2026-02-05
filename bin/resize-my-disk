@@ -1,0 +1,32 @@
+#!/bin/bash
+set -e
+
+# Check for root
+if [ "$(id -u)" -ne 0 ]; then
+   echo "This script must be run as root" 
+   exit 1
+fi
+
+# 1. Identify the root partition
+ROOT_PART=$(findmnt / -o source -n)
+
+# 2. Identify the parent disk correctly (Handling /dev/vda vs /dev/nvme0n1)
+PARENT_NAME=$(lsblk -no pkname "$ROOT_PART")
+ROOT_DEV="/dev/$PARENT_NAME"
+
+# 3. Identify the partition number
+PART_NUM=$(lsblk -no partn "$ROOT_PART")
+
+echo "Detected Root: $ROOT_PART (Partition $PART_NUM on Disk $ROOT_DEV)"
+
+# 4. Trigger kernel rescan so it sees the new disk space
+echo 1 > "/sys/class/block/$PARENT_NAME/device/rescan" || echo "Rescan trigger failed, continuing (might already be detected)..."
+
+# 5. Resize partition table
+parted -s "$ROOT_DEV" resizepart "$PART_NUM" 100%
+
+# 6. Resize filesystem (Ext4)
+resize2fs "$ROOT_PART"
+
+echo "Success. New Size:"
+df -h /
