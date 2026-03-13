@@ -1,0 +1,41 @@
+#cloud-config
+
+runcmd:
+  # Fix apt lists
+  - rm -rf /var/lib/apt/lists/*
+  - mkdir -p /var/lib/apt/lists/partial
+  - apt update
+
+  # Install etckeeper first
+  - apt install -y etckeeper
+
+  # Purge unwanted packages
+  - |
+    packages=(
+      accountsservice alsa-* amd64-microcode apport* avahi-* bind9-* bluez*
+      btrfs-progs cloud-init cloud-guest-utils command-not-found* containerd
+      crda cryptsetup* cups cups-* dig dmeventd dmidecode dmsetup doc-base
+      docker.io docker-doc docker-compose docker-compose-v2 eatmydata ed eject
+      fonts-* firmware-* fontconfig fuse3 fwupd fwupd-signed geoip-database
+      groff-base hc-utils hdparm htop ibverbs* inetutils-telnet inputattach
+      intel-microcode joystick landscape-common landscape-client laptop-detect
+      libbluetooth* libnss-mdns linux-firmware lshw lvm2 lxd* info irqbalance
+      man-db manpages* mdadm memtest86+ modemmanager motd-news-config
+      multipath-tools nslookup ntfs-3g numactl open-iscsi os-prober overlayroot
+      packagekit pastebinit pciutils pipewire* plymouth
+      plymouth-theme-ubuntu-text podman-docker popularity-contest
+      powermgmt-base ppp pppconfig pppoeconf psmisc pulseaudio* python3-babel
+      python3-bcrypt python3-botocore python3-jmespath python3-pip-whl
+      python3-s3transfer rfkill runc rsync run-one s3transfer secureboot-db
+      sosreport sg3-utils* snapd tcpdump thermald thin-provisioning-tools
+      tpm-udev trace-cmd ubuntu-docs ubuntu-advantage-tools ubuntu-pro*
+      ubuntu-release-upgrader-core ubuntu-report udisks2 unminimize update-motd
+      upower usbutils xfsprogs vim-* xauth xdg-user-dirs xxd wpasupplicant
+      wireless* whoopsie zerofree
+    )
+    for package in "${packages[@]}"; do
+      apt purge -y "$package" 2>/dev/null || true
+    done
+
+  # Final cleanup
+  - apt autoremove --purge -y
