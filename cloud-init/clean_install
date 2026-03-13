@@ -6,8 +6,11 @@ runcmd:
   - mkdir -p /var/lib/apt/lists/partial
   - apt update
 
-  # Install etckeeper first
-  - apt install -y etckeeper
+  # Install essential tools
+  - apt install -y etckeeper ubuntu-advantage-tools
+
+  # Upgrade all packages
+  - apt dist-upgrade -y
 
   # Purge unwanted packages
   - |
@@ -28,10 +31,9 @@ runcmd:
       python3-bcrypt python3-botocore python3-jmespath python3-pip-whl
       python3-s3transfer rfkill runc rsync run-one s3transfer secureboot-db
       sosreport sg3-utils* snapd tcpdump thermald thin-provisioning-tools
-      tpm-udev trace-cmd ubuntu-docs ubuntu-advantage-tools ubuntu-pro*
-      ubuntu-release-upgrader-core ubuntu-report udisks2 unminimize update-motd
-      upower usbutils xfsprogs vim-* xauth xdg-user-dirs xxd wpasupplicant
-      wireless* whoopsie zerofree
+      tpm-udev trace-cmd ubuntu-docs ubuntu-release-upgrader-core
+      ubuntu-report udisks2 unminimize update-motd upower usbutils xfsprogs
+      vim-* xauth xdg-user-dirs xxd wpasupplicant wireless* whoopsie zerofree
     )
     for package in "${packages[@]}"; do
       apt purge -y "$package" 2>/dev/null || true
