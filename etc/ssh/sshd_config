@@ -77,9 +77,6 @@ HostKey /etc/ssh/ssh_host_rsa_key
 # SECURITY SETTINGS
 # ====================
 
-# Privilege separation for security
-UsePrivilegeSeparation sandbox
-
 # Strict mode checking
 StrictModes yes
 
@@ -97,7 +94,6 @@ PermitTunnel no
 # Disable unused authentication methods
 HostbasedAuthentication no
 IgnoreRhosts yes
-RhostsRSAAuthentication no
 
 # Client alive settings (prevents hanging connections)
 ClientAliveInterval 300
