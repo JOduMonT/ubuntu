@@ -1,0 +1,33 @@
+#cloud-config
+
+runcmd:
+  # Fix apt lists
+  - rm -rf /var/lib/apt/lists/*
+  - mkdir -p /var/lib/apt/lists/partial
+  - apt update
+
+  # Install essential tools
+  - apt install -y etckeeper
+
+  # Upgrade all packages
+  - apt dist-upgrade -y
+
+  # Purge unwanted packages
+  - |
+    packages=(
+      accountsservice alsa-* amd64-microcode apport* avahi-* bind9-* bluez*
+      btrfs-progs cloud-init cloud-guest-utils command-not-found* containerd
+      crda cryptsetup* cups cups-* dmeventd dmidecode dmsetup doc-base
+      docker.io docker-doc docker-compose docker-compose-v2 ed eject
+      fonts-* firmware-* fontconfig fuse3 fwupd fwupd-signed geoip-database
+      groff-base hdparm htop ibverbs* inetutils-telnet inputattach
+      joystick laptop-detect
+      libbluetooth* libnss-mdns linux-firmware lshw lvm2 info irqbalance
+      man-db manpages* mdadm memtest86+ modemmanager
+      multipath-tools ntfs-3g numactl open-iscsi os-prober
+      packagekit pciutils pipewire* plymouth
+      podman-docker popularity-contest
+      powermgmt-base ppp pppconfig pppoeconf psmisc pulseaudio* python3-babel
+      python3-bcrypt python3-pip-whl
+      rfkill runc rsync sg3-utils* snapd tcpdump thermald thin-provisioning-tools
+      tpm-udev
