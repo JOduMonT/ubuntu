@@ -7,6 +7,7 @@ runcmd:
   - apt update
 
   # Install essential tools
+  # https://wiki.debian.org/PeriodicUpdates
   - apt install -y etckeeper unattended-upgrades
 
   # Upgrade all packages
