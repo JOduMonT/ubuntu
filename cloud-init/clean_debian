@@ -7,7 +7,7 @@ runcmd:
   - apt update
 
   # Install essential tools
-  - apt install -y etckeeper
+  - apt install -y etckeeper unattended-upgrades
 
   # Upgrade all packages
   - apt dist-upgrade -y
