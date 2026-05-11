@@ -8,10 +8,6 @@ exit 0
 
 REPO="" # Use a Private Repo
 USERNAME="" # Your GitHub username
-PASSWORD="" # [Use a Classic Token as Password](https://github.com/settings/tokens)
+TOKEN="" # [Use a Classic Token as Password](https://github.com/settings/tokens)
 
-cd /etc
-git commit -m "left over before etckeeper"
-git branch -M main
-git remote add origin https://github.com/${USERNAME}/${REPO}.git
-git push -u origin main
+etckeeper vcs remote add origin https://${USERNAME}:${TOKEN}@github.com/${USERNAME}/${REPO}.git
