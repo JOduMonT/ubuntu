@@ -1,186 +1,167 @@
-# SSH Daemon Configuration File
+# ==============================================================================
+# sshd_config — hardened server baseline
 # Based on DevSec SSH Baseline: https://github.com/dev-sec/ssh-baseline
-# This configuration follows the hardening guidelines from the DevSec project
+# Review all CHANGEME sections before deploying
+# Test with: sshd -t && sshd -T | grep -i "permitroot\|passwordauth\|allowusers"
+# ==============================================================================
 
 # ====================
-# NETWORK SETTINGS
+# NETWORK
 # ====================
 
-# Listen on all available addresses
-#Port 22
-#AddressFamily any
+# Bind only to the interface(s) you actually use.
+# If this machine has both a public and private interface, bind to private only.
+# CHANGEME — comment out to listen on all interfaces
 #ListenAddress 0.0.0.0
 #ListenAddress ::
+
+#Port 22
+# CHANGEME — consider a non-standard port if this is internet-facing.
+# If changed, update your firewall: ufw allow <port>/tcp
+
+# ====================
+# HOST KEYS
+# Only load keys for algorithms you actually advertise below.
+# ed25519 preferred; RSA included as fallback for older clients.
+# ====================
+
+HostKey /etc/ssh/ssh_host_ed25519_key
+HostKey /etc/ssh/ssh_host_rsa_key
+
+# Regenerate host keys if they predate this hardening:
+#   rm /etc/ssh/ssh_host_*
+#   ssh-keygen -t ed25519 -f /etc/ssh/ssh_host_ed25519_key -N ""
+#   ssh-keygen -t rsa -b 4096 -f /etc/ssh/ssh_host_rsa_key -N ""
 
 # ====================
 # AUTHENTICATION
 # ====================
 
-# Use only SSH Protocol 2 (for older OpenSSH versions < 7.6)
-# Note: Protocol directive is deprecated in newer versions as only v2 is supported
-Protocol 2
+# Explicitly require public key — don't rely on everything-else-being-disabled
+AuthenticationMethods publickey
 
-# Root login configuration
-PermitRootLogin prohibit-password
+PubkeyAuthentication yes
+AuthorizedKeysFile .ssh/authorized_keys
 
-# Password and authentication settings
+# All other auth methods: closed
 PasswordAuthentication no
 PermitEmptyPasswords no
 ChallengeResponseAuthentication no
 KbdInteractiveAuthentication no
-UsePAM yes
-
-# Public key authentication
-PubkeyAuthentication yes
-AuthorizedKeysFile .ssh/authorized_keys
-
-# Maximum authentication attempts
-MaxAuthTries 3
-
-# Authentication timeout
-LoginGraceTime 60
-
-# Maximum sessions per connection
-MaxSessions 2
-
-# ====================
-# CRYPTOGRAPHIC ALGORITHMS
-# ====================
-
-# Secure Ciphers (based on OpenSSH version >= 6.6)
-# These are the approved ciphers from dev-sec ssh-baseline
-Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes192-ctr,aes128-ctr
-
-# Secure Key Exchange Algorithms (based on OpenSSH version >= 8.5)
-# These provide forward secrecy and quantum resistance
-KexAlgorithms sntrup761x25519-sha512@openssh.com,curve25519-sha256@libssh.org,diffie-hellman-group-exchange-sha256
-
-# Secure Message Authentication Codes (based on OpenSSH version >= 6.6)
-# ETM (Encrypt-then-MAC) algorithms are preferred for security
-MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,umac-128-etm@openssh.com,hmac-sha2-512,hmac-sha2-256
-
-# Host Key Algorithms (modern, secure algorithms only)
-HostKeyAlgorithms ssh-ed25519,ssh-ed25519-cert-v01@openssh.com,rsa-sha2-512,rsa-sha2-256
-
-# Public Key Accepted Types
-PubkeyAcceptedKeyTypes ssh-ed25519,ssh-ed25519-cert-v01@openssh.com,rsa-sha2-512,rsa-sha2-256
-
-# ====================
-# HOST KEYS
-# ====================
-
-# Use only secure host keys
-HostKey /etc/ssh/ssh_host_ed25519_key
-HostKey /etc/ssh/ssh_host_rsa_key
-
-# ====================
-# SECURITY SETTINGS
-# ====================
-
-# Strict mode checking
-StrictModes yes
-
-# Logging configuration
-SyslogFacility AUTH
-LogLevel INFO
-
-# Disable potentially dangerous features
-AllowAgentForwarding no
-AllowTcpForwarding no
-GatewayPorts no
-X11Forwarding no
-PermitTunnel no
-
-# Disable unused authentication methods
 HostbasedAuthentication no
 IgnoreRhosts yes
 
-# Client alive settings (prevents hanging connections)
-ClientAliveInterval 300
-ClientAliveCountMax 2
+# Root login: disabled entirely.
+# If you need root access, SSH as a sudo user and escalate.
+# 'prohibit-password' is not enough — a compromised key is still a root shell.
+PermitRootLogin no
 
-# TCP settings
-TCPKeepAlive no
-
-# User environment restrictions
-PermitUserEnvironment no
-
-# Compression (disabled for security)
-Compression no
+# PAM handles account/session (expiry, limits, audit). Keep enabled.
+UsePAM yes
 
 # ====================
 # ACCESS CONTROL
+# Populate at least one of these before deploying.
+# Leaving them commented = any valid user can attempt to authenticate.
 # ====================
 
-# Maximum startups to prevent DoS
-MaxStartups 10:30:100
+# CHANGEME — restrict to specific users and/or source IPs
+# AllowUsers youruser@192.168.1.0/24 youruser@10.0.0.0/8
+# AllowGroups ssh-users
 
-# Banner (optional - uncomment and customize as needed)
-#Banner /etc/ssh/banner
-
-# Allow specific users/groups (customize as needed)
-# Examples:
-# AllowUsers admin@192.168.1.0/24 user@10.0.0.0/8
-# AllowGroups ssh-users wheel
-# DenyUsers root
-# DenyGroups root
+# Note: if UseDNS is no (see below), hostname patterns in AllowUsers won't resolve.
+# Use IP ranges instead.
 
 # ====================
-# SFTP CONFIGURATION
+# LIMITS & TIMEOUTS
 # ====================
 
-# Secure SFTP subsystem with chroot
+MaxAuthTries 3
+LoginGraceTime 30        # 60s is generous; 30s is plenty
+MaxSessions 2            # Increase if using Ansible/Fabric (they open multiple channels)
+MaxStartups 10:30:100    # Rate-limit unauthenticated connections; prevents DoS
+
+ClientAliveInterval 300  # Send keepalive every 5 min
+ClientAliveCountMax 2    # Drop after 2 missed responses (~10 min idle timeout)
+TCPKeepAlive no          # Use encrypted ClientAlive instead of plain TCP keepalive
+
+# Force session rekeying. Limits damage window if a session key is compromised.
+RekeyLimit 1G 1h
+
+# ====================
+# CRYPTOGRAPHIC ALGORITHMS
+# Ordered: prefer post-quantum > ECDH > FFDH; prefer AEAD ciphers; ETM MACs only
+# ====================
+
+# Ciphers: AEAD only (chacha20 and AES-GCM provide both encryption + integrity)
+Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes192-ctr,aes128-ctr
+
+# KEX: post-quantum hybrid first, then curve25519, then FFDH with strong group
+KexAlgorithms sntrup761x25519-sha512@openssh.com,curve25519-sha256,curve25519-sha256@libssh.org,diffie-hellman-group-exchange-sha256
+
+# MACs: ETM (Encrypt-then-MAC) only — prevents CBC padding oracle attacks
+# Non-ETM variants removed intentionally
+MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,umac-128-etm@openssh.com
+
+# Host key algorithms: ed25519 preferred, RSA-SHA2 as fallback (RSA-SHA1 excluded)
+HostKeyAlgorithms ssh-ed25519,ssh-ed25519-cert-v01@openssh.com,rsa-sha2-512,rsa-sha2-256
+
+# Accepted client public key types: same policy as host keys
+PubkeyAcceptedKeyTypes ssh-ed25519,ssh-ed25519-cert-v01@openssh.com,rsa-sha2-512,rsa-sha2-256
+
+# ====================
+# DISABLED FEATURES
+# Each disabled item is a potential pivot point. Uncomment only if you have
+# a specific operational need and understand the tradeoff.
+# ====================
+
+AllowAgentForwarding no  # Exposed agent can be hijacked on compromised hosts
+AllowTcpForwarding no    # Prevents use as a tunnel/proxy; breaks some workflows
+                         # Set to 'local' if you need local port forwarding only
+GatewayPorts no
+X11Forwarding no
+PermitTunnel no
+PermitUserEnvironment no # Prevents env var injection via authorized_keys
+Compression no           # Compression before encryption leaks side-channel info (CRIME)
+
+# ====================
+# LOGGING & MISC
+# ====================
+
+SyslogFacility AUTH
+LogLevel VERBOSE         # Bumped from INFO: logs key fingerprints on auth (useful for audit)
+
+StrictModes yes          # Reject login if key files have bad permissions
+PrintLastLog yes
+PrintMotd no
+
+UseDNS no                # Disables hostname resolution; faster auth
+                         # Side effect: hostname patterns in AllowUsers won't work — use IPs
+
+VersionAddendum none     # Don't advertise OpenSSH version in banner
+
+# ====================
+# SFTP
+# ====================
+
 Subsystem sftp internal-sftp
 
-# Example SFTP chroot configuration (uncomment and customize as needed)
+# Chroot example for SFTP-only accounts (uncomment and adapt):
 #Match Group sftponly
-#    ChrootDirectory /home/chroot/%u
+#    ChrootDirectory /srv/sftp/%u
 #    ForceCommand internal-sftp
 #    AllowTcpForwarding no
 #    AllowAgentForwarding no
 #    X11Forwarding no
 
-# ====================
-# ADDITIONAL SECURITY
-# ====================
-
-# Print last log
-PrintLastLog yes
-
-# Print MOTD
-PrintMotd no
-
-# Use DNS for hostname resolution (can be disabled for performance)
-UseDNS no
-
-# Version string (customize as needed for security through obscurity)
-VersionAddendum none
-
-# Disable deprecated algorithms and features
-# Note: Many of these are already disabled by default in modern OpenSSH
-
-# For older OpenSSH versions, explicitly disable weak algorithms:
-# RekeyLimit 1G 1h
-
-# ====================
-# PERFORMANCE TUNING
-# ====================
-
-# Connection multiplexing (can be enabled if needed)
-# MaxSessions already set above
-
-# ====================
-# COMPLIANCE NOTES
-# ====================
-
-# This configuration follows the DevSec SSH Baseline requirements:
-# - Uses only secure ciphers, KEX algorithms, and MACs
-# - Disables weak authentication methods
-# - Enables proper logging and monitoring
-# - Implements principle of least privilege
-# - Follows current cryptographic best practices
-#
-# For specific compliance requirements, additional modifications may be needed.
-# Always test configuration changes in a non-production environment first.
-
-# End of configuration
+# ==============================================================================
+# DEPLOY CHECKLIST
+# ------------------------------------------------------------------------------
+# 1. Confirm your SSH key is in authorized_keys BEFORE applying
+# 2. Populate AllowUsers / AllowGroups above
+# 3. Set ListenAddress if you want to restrict to a specific interface
+# 4. Test config:      sshd -t
+# 5. Dry-run output:   sshd -T | grep -E "permitroot|passwordauth|allowusers|authenticationmethods"
+# 6. Apply:            systemctl reload sshd
+# 7. Keep your CURRENT session open and test login in a NEW terminal before closing
+# ==============================================================================
