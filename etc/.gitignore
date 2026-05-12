@@ -1,0 +1,95 @@
+# etckeeper-managed /etc on Ubuntu
+# For use with a private GitHub remote
+
+# =============================================================================
+# SECRETS & CREDENTIALS — never commit these even to a private repo
+# =============================================================================
+shadow
+shadow-
+gshadow
+gshadow-
+master.passwd
+passwd-
+group-
+subuid-
+subgid-
+ssl/private/
+ssl/certs/ssl-cert-snakeoil.pem
+openvpn/
+wireguard/
+NetworkManager/system-connections/
+wpa_supplicant/
+letsencrypt/
+keys/
+*.key
+*.pem
+*.p12
+*.pfx
+*.crt
+*.cer
+ssh/ssh_host_*
+
+# =============================================================================
+# MACHINE-SPECIFIC / RUNTIME STATE (not useful in VCS)
+# =============================================================================
+adjtime
+hostname
+machine-id
+timezone          # managed by timedatectl, not hand-edited
+localtime         # symlink, not a file
+mtab              # symlink to /proc/self/mounts
+fstab.d/
+blkid.conf
+blkid.tab
+blkid.tab.old
+crypttab          # contains device UUIDs; machine-specific
+
+# systemd runtime state
+systemd/system/sockets.target.wants/
+systemd/system/multi-user.target.wants/
+systemd/system/*.wants/
+
+# udev
+udev/rules.d/70-persistent-net.rules
+udev/rules.d/70-persistent-cd.rules
+
+# =============================================================================
+# PACKAGE MANAGER NOISE
+# =============================================================================
+apt/sources.list.d/*.save
+apt/trusted.gpg~
+*.dpkg-old
+*.dpkg-dist
+*.dpkg-new
+*.ucf-old
+*.ucf-dist
+*.ucf-new
+*.rpmsave
+*.rpmnew
+
+# =============================================================================
+# LOGS & CACHES
+# =============================================================================
+*.log
+*.log.*
+*.pid
+*.cache
+ld.so.cache
+prelink.cache
+cups/subscriptions.conf
+cups/subscriptions.conf.O
+
+# =============================================================================
+# EDITOR / OS DETRITUS
+# =============================================================================
+*~
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# =============================================================================
+# ETCKEEPER OWN FILES (already tracked by etckeeper itself)
+# =============================================================================
+.etckeeper
+.gitignore    # remove this line if you want git to track this file
