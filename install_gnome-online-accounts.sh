@@ -1,3 +1,6 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
 # GOAL: install and run GOA in XCFE
 # ref: https://askubuntu.com/questions/733061/gnome-online-accounts-goa-with-xubuntu
 

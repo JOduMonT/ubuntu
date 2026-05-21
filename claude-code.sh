@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 # as user
 ### https://github.com/nvm-sh/nvm#installing-and-updating
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.4/install.sh | bash
