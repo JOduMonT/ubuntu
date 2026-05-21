@@ -112,3 +112,8 @@ echo ""
 echo "✓ Done. etckeeper will now auto-push to github on apt operations."
 echo "  Deploy key is at: ${KEY_PATH}"
 echo "  SSH alias:        github-etckeeper → github.com"
+
+# Post-install assertion (best-effort — non-fatal if verify.sh is absent)
+if [[ -x ./verify.sh ]]; then
+    ./verify.sh etckeeper "etckeeper --version" || true
+fi

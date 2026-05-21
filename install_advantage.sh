@@ -92,3 +92,8 @@ info "Done. Dashboard: https://ubuntu.com/pro/dashboard"
 if [[ "${ENABLE_FIPS,,}" == "y" ]]; then
     warn "Reboot required to activate FIPS kernel"
 fi
+
+# Post-install assertion (best-effort — non-fatal if verify.sh is absent)
+if [[ -x ./verify.sh ]]; then
+    ./verify.sh pro "pro version" || true
+fi
