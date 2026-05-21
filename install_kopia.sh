@@ -1,5 +1,4 @@
-apt update
-apt install -y curl
+./bootstrap.sh || exit
 
 # ref: https://kopia.io/docs/installation/#linux-installation-using-apt-debian-ubuntu
 curl -s https://kopia.io/signing-key | sudo gpg --dearmor -o /etc/apt/keyrings/kopia-keyring.gpg

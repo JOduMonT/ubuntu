@@ -1,5 +1,5 @@
-apt update
-apt install -y curl jq
+./bootstrap.sh || exit
+apt install -y jq
 
 curl -fsSL https://raw.githubusercontent.com/JOduMonT/ubuntu/refs/heads/main/clean_install.sh|bash
 curl -fsSL https://raw.githubusercontent.com/JOduMonT/ubuntu/refs/heads/main/install_advantage.sh|bash
