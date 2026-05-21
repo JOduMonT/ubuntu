@@ -27,3 +27,8 @@ echo "✓ sshd reloaded"
 
 echo ""
 echo "  Test login in a NEW terminal before closing this session."
+
+# Post-install assertion (best-effort — non-fatal if verify.sh is absent)
+if [[ -x ./verify.sh ]]; then
+    ./verify.sh sshd "sshd -t" || true
+fi
