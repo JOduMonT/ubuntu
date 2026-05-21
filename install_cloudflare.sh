@@ -1,5 +1,4 @@
-apt update
-apt install -y curl
+./bootstrap.sh || exit
 
 # Add cloudflare gpg key
 mkdir -p --mode=0755 /usr/share/keyrings

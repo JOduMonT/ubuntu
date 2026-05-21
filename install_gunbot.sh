@@ -1,5 +1,5 @@
-apt update
-apt install -y curl unzip
+./bootstrap.sh || exit
+apt install -y unzip
 
 curl -fsSL "https://raw.githubusercontent.com/JOduMonT/ubuntu/refs/heads/main/clean_install.sh" | bash
 curl -fsSL "https://raw.githubusercontent.com/JOduMonT/ubuntu/refs/heads/main/install_nodejs.sh" | bash
