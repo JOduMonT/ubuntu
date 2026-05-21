@@ -1,8 +1,8 @@
 apt update
 apt install -y curl unzip
 
-curl -fsSL "https://raw.githubusercontent.com/JOduMonT/ubuntu/refs/heads/main/clean_install.sh|bash
-curl -fsSL "https://raw.githubusercontent.com/JOduMonT/ubuntu/refs/heads/main/install_nodejs.sh|bash
+curl -fsSL "https://raw.githubusercontent.com/JOduMonT/ubuntu/refs/heads/main/clean_install.sh" | bash
+curl -fsSL "https://raw.githubusercontent.com/JOduMonT/ubuntu/refs/heads/main/install_nodejs.sh" | bash
 
 ## Install PM2
 ### ensure to install nodejs before: https://raw.githubusercontent.com/JOduMonT/ubuntu/refs/heads/main/install_nodejs.sh

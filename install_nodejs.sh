@@ -10,5 +10,7 @@ apt install -y nodejs
 
 npm install -g npm@latest
 
-chown root:sudo /usr/bin/ /usr/lib/node_modules/
-chmod 775 /usr/bin/ /usr/lib/node_modules/
+# Allow members of the `sudo` group to install global npm modules without root.
+# /usr/bin is deliberately NOT modified: changing its perms is a privesc footgun.
+chown root:sudo /usr/lib/node_modules/
+chmod 775 /usr/lib/node_modules/
