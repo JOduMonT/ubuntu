@@ -1,3 +1,6 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
 ./bootstrap.sh || exit
 
 # ref: https://kopia.io/docs/installation/#linux-installation-using-apt-debian-ubuntu

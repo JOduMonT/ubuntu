@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 wget -O /tmp/netdata-kickstart.sh https://get.netdata.cloud/kickstart.sh && sh /tmp/netdata-kickstart.sh --stable-channel --disable-telemetry
 sudo wget -O /etc/netdata/netdata.conf http://localhost:19999/netdata.conf
 

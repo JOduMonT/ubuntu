@@ -1,3 +1,6 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
 # ADD SUPER USER
 #USER=
 useradd -g users -mNs /bin/bash ${USER:-rescue}

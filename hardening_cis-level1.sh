@@ -1,3 +1,6 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
 curl -fsSL https://raw.githubusercontent.com/JOduMonT/ubuntu/refs/heads/main/install_advantage.sh|bash
 
 pro enable usg

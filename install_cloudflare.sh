@@ -1,3 +1,6 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
 ./bootstrap.sh || exit
 
 # Add cloudflare gpg key
