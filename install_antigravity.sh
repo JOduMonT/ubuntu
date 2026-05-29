@@ -6,17 +6,27 @@
 
 set -euo pipefail
 
+# ANSI Color Codes for Premium CLI Aesthetics
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+BLUE='\033[0;34m'
+YELLOW='\033[1;33m'
+CYAN='\033[0;36m'
+NC='\033[0m' # No Color
+
+log() { echo -e "${BLUE}[install-antigravity]${NC} 🚀 $*"; }
+success() { echo -e "${GREEN}[install-antigravity]${NC} ✨ $*"; }
+warn() { echo -e "${YELLOW}[install-antigravity]${NC} ⚠️  $*"; }
+error() { echo -e "${RED}[install-antigravity] [ERROR]${NC} ❌ $*" >&2; }
+
 # Ensure script is run as root/sudo
 if [[ $EUID -ne 0 ]]; then
-   echo "[ERROR] This installer must be run as root (or via sudo)." >&2
+   error "This installer must be run as root (or via sudo)."
    exit 1
 fi
 
 # Invoke bootstrap sequence to ensure base tools are ready
 ./bootstrap.sh || exit
-
-log() { echo "[install-antigravity] $*"; }
-error() { echo "[install-antigravity] [ERROR] $*" >&2; }
 
 # 1. Verify Minimum System Requirements
 log "Verifying system prerequisites..."
@@ -34,7 +44,6 @@ fi
 # Find the system's libstdc++.so.6 using ldconfig
 LDCONFIG_BIN=$(command -v ldconfig || echo "/sbin/ldconfig")
 libstdc_path=$($LDCONFIG_BIN -p 2>/dev/null | awk -F '=> ' '/libstdc\+\+\.so\.6/ {if (!printed) {print $2; printed=1}}' || echo "")
-
 
 if [[ -z "$libstdc_path" || ! -f "$libstdc_path" ]]; then
     # Fallback to scanning common library directories if ldconfig output didn't yield a match
@@ -57,13 +66,13 @@ if [[ -n "$libstdc_path" && -f "$libstdc_path" ]]; then
             exit 1
         fi
     else
-        error "Could not parse GLIBCXX symbols from $libstdc_path. Skipping safety check, attempting to proceed..."
+        warn "Could not parse GLIBCXX symbols from $libstdc_path. Skipping safety check, attempting to proceed..."
     fi
 else
-    error "Could not find libstdc++.so.6 on the system. Skipping safety check, attempting to proceed..."
+    warn "Could not find libstdc++.so.6 on the system. Skipping safety check, attempting to proceed..."
 fi
 
-log "Prerequisite validation passed."
+success "Prerequisite validation passed."
 
 # 2. Dynamic Version Detection
 log "Querying Google Cloud Storage for the latest Antigravity version..."
@@ -86,7 +95,7 @@ if [[ -z "$latest_version" ]]; then
     exit 1
 fi
 
-log "Resolved latest stable version: $latest_version"
+success "Resolved latest stable version: $latest_version"
 DOWNLOAD_URL="https://storage.googleapis.com/antigravity-public/antigravity-hub/${latest_version}/linux-x64/Antigravity.tar.gz"
 
 # 3. Download to temporary directory
@@ -95,7 +104,7 @@ trap 'rm -rf "$TMP_DIR"' EXIT
 
 log "Downloading Antigravity package..."
 curl -fsSL -o "$TMP_DIR/Antigravity.tar.gz" "$DOWNLOAD_URL"
-log "Download completed successfully."
+success "Download completed successfully."
 
 # 4. Installation
 INSTALL_DIR="/opt/antigravity"
@@ -111,7 +120,7 @@ mkdir -p "$INSTALL_DIR"
 
 log "Extracting package contents..."
 tar -xzf "$TMP_DIR/Antigravity.tar.gz" -C "$INSTALL_DIR" --strip-components=1
-log "Extraction completed."
+success "Extraction completed."
 
 # Configure chrome-sandbox permissions (essential for Electron sandbox on Linux)
 if [[ -f "$INSTALL_DIR/chrome-sandbox" ]]; then
@@ -151,7 +160,23 @@ EOF
 
 chmod 755 "$BIN_LINK"
 
-# 6. Create desktop entry (user menu shortcut)
+# 6. Extract application icon from app.asar
+ICON_DEST="/usr/share/pixmaps/antigravity.png"
+log "Extracting application icon to $ICON_DEST..."
+if command -v npx &>/dev/null; then
+    # Run extraction inside /usr/share/pixmaps to save the extracted icon directly
+    if ( cd /usr/share/pixmaps && npx --yes @electron/asar extract-file "$INSTALL_DIR/resources/app.asar" icon.png &>/dev/null && mv icon.png antigravity.png &>/dev/null ); then
+        success "Application icon successfully extracted to $ICON_DEST"
+    else
+        warn "Could not extract icon from app.asar. Falling back to default system icon."
+        ICON_DEST="system-run"
+    fi
+else
+    warn "npx not found. Skipping icon extraction and falling back to default system icon."
+    ICON_DEST="system-run"
+fi
+
+# 7. Create desktop entry (user menu shortcut)
 DESKTOP_ENTRY="/usr/share/applications/antigravity.desktop"
 log "Creating desktop entry at $DESKTOP_ENTRY..."
 cat << EOF > "$DESKTOP_ENTRY"
@@ -159,11 +184,14 @@ cat << EOF > "$DESKTOP_ENTRY"
 Version=1.0
 Type=Application
 Name=Antigravity
+GenericName=Code Editor
 Comment=Antigravity Code Editor
 Exec=$BIN_LINK %U
 Terminal=false
 Categories=Development;TextEditor;Utility;
-Icon=system-run
+Icon=$ICON_DEST
+StartupNotify=true
+StartupWMClass=antigravity
 EOF
 
 chmod 644 "$DESKTOP_ENTRY"
@@ -173,15 +201,17 @@ if command -v update-desktop-database &>/dev/null; then
     update-desktop-database /usr/share/applications || true
 fi
 
-log "Installation successful!"
-echo "========================================================================="
-echo " Antigravity has been successfully installed."
-echo " Version: $latest_version"
-echo " Location: $INSTALL_DIR"
-echo " Link: $BIN_LINK"
-echo " Desktop Entry: $DESKTOP_ENTRY"
-echo ""
-echo " You can now run the application by typing: antigravity"
-echo " Or launch it from your Desktop Environment's Applications Menu."
-echo "========================================================================="
-
+# 8. Beautiful success message
+echo -e "\n${GREEN}=========================================================================${NC}"
+echo -e " ${GREEN}🎉 Antigravity has been successfully installed! 🎉${NC}"
+echo -e "-------------------------------------------------------------------------"
+echo -e " ${CYAN}Version:${NC}       $latest_version"
+echo -e " ${CYAN}Location:${NC}      $INSTALL_DIR"
+echo -e " ${CYAN}Binary Link:${NC}   $BIN_LINK"
+echo -e " ${CYAN}Desktop Link:${NC}  $DESKTOP_ENTRY"
+echo -e " ${CYAN}Icon Installed:${NC} $ICON_DEST"
+echo -e "-------------------------------------------------------------------------"
+echo -e " ${GREEN}You can now launch the application by:${NC}"
+echo -e " 1. Running command: ${CYAN}antigravity${NC}"
+echo -e " 2. Searching for ${CYAN}Antigravity${NC} in your Desktop Applications Menu."
+echo -e "${GREEN}=========================================================================${NC}\n"
