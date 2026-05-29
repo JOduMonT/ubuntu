@@ -1,4 +1,0 @@
-# require: https://github.com/danielmiessler/Fabric
-for file in *.md; do
-  cat "$file" | fabric -p extract_wisdom -o "${file%}-wisdom_extracted.md"
-done

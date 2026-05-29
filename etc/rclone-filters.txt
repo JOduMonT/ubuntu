@@ -1,0 +1,16 @@
+# Rclone Bidirectional Sync Filter Rules
+#
+# Rules are evaluated from top to bottom. The first match wins.
+# '+' includes a directory or file, '-' excludes it.
+# '/' anchors the match to the root of the synced folder.
+# '**' matches everything recursively under that directory.
+
+# --- Directories to Synchronize ---
++ /Desktop/**
++ /Documents/**
++ /Music/**
++ /Public/**
++ /Templates/**
+
+# --- Exclude everything else ---
+- **

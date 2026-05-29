@@ -1,0 +1,16 @@
+[Unit]
+Description=Rclone Bidirectional Sync with Google Drive
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/rclone-bisync.sh
+User=__USER__
+Group=__USER__
+Environment=HOME=/home/__USER__
+Restart=on-failure
+RestartSec=30
+
+[Install]
+WantedBy=multi-user.target
