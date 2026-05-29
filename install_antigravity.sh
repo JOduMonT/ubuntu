@@ -160,21 +160,16 @@ EOF
 
 chmod 755 "$BIN_LINK"
 
-# 6. Extract application icon from app.asar
+# 6. Download official application icon
 ICON_DEST="/usr/share/pixmaps/antigravity.png"
-log "Extracting application icon to $ICON_DEST..."
-if command -v npx &>/dev/null; then
-    # Run extraction inside /usr/share/pixmaps to save the extracted icon directly
-    if ( cd /usr/share/pixmaps && npx --yes @electron/asar extract-file "$INSTALL_DIR/resources/app.asar" icon.png &>/dev/null && mv icon.png antigravity.png &>/dev/null ); then
-        success "Application icon successfully extracted to $ICON_DEST"
-    else
-        warn "Could not extract icon from app.asar. Falling back to default system icon."
-        ICON_DEST="system-run"
-    fi
+log "Downloading official application icon to $ICON_DEST..."
+if curl -fsSL -o "$ICON_DEST" "https://antigravity.google/assets/image/brand/antigravity-icon__full-color.png"; then
+    success "Official application icon successfully downloaded to $ICON_DEST"
 else
-    warn "npx not found. Skipping icon extraction and falling back to default system icon."
+    warn "Failed to download official icon. Falling back to default system icon."
     ICON_DEST="system-run"
 fi
+
 
 # 7. Create desktop entry (user menu shortcut)
 DESKTOP_ENTRY="/usr/share/applications/antigravity.desktop"
