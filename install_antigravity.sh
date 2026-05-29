@@ -151,6 +151,27 @@ EOF
 
 chmod 755 "$BIN_LINK"
 
+# 6. Create desktop entry (user menu shortcut)
+DESKTOP_ENTRY="/usr/share/applications/antigravity.desktop"
+log "Creating desktop entry at $DESKTOP_ENTRY..."
+cat << EOF > "$DESKTOP_ENTRY"
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Antigravity
+Comment=Antigravity Code Editor
+Exec=$BIN_LINK %U
+Terminal=false
+Categories=Development;TextEditor;Utility;
+Icon=system-run
+EOF
+
+chmod 644 "$DESKTOP_ENTRY"
+
+# Refresh desktop database to update menus
+if command -v update-desktop-database &>/dev/null; then
+    update-desktop-database /usr/share/applications || true
+fi
 
 log "Installation successful!"
 echo "========================================================================="
@@ -158,6 +179,9 @@ echo " Antigravity has been successfully installed."
 echo " Version: $latest_version"
 echo " Location: $INSTALL_DIR"
 echo " Link: $BIN_LINK"
+echo " Desktop Entry: $DESKTOP_ENTRY"
 echo ""
 echo " You can now run the application by typing: antigravity"
+echo " Or launch it from your Desktop Environment's Applications Menu."
 echo "========================================================================="
+
