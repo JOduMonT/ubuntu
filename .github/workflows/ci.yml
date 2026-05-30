@@ -1,0 +1,32 @@
+name: Installer Validation (Dry-Run)
+
+on:
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test-baseline:
+    name: Test Bootstrap and Node.js install on standard Ubuntu
+    runs-on: ubuntu-latest
+    container:
+      image: ubuntu:24.04
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up sudo mock (Docker images run as root)
+        run: |
+          apt-get update && apt-get install -y sudo
+
+      - name: Run Bootstrap Script
+        run: |
+          chmod +x ./bootstrap.sh
+          ./bootstrap.sh
+
+      - name: Test Node.js Script Installation
+        run: |
+          chmod +x ./install_nodejs.sh ./verify.sh
+          ./install_nodejs.sh
+          # Run validation assertions
+          ./verify.sh node "node --version"
+          ./verify.sh npm "npm --version"

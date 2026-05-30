@@ -1,7 +1,13 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-curl -fsSL https://raw.githubusercontent.com/JOduMonT/ubuntu/refs/heads/main/install_advantage.sh|bash
+if [[ -f "./install_advantage.sh" ]]; then
+  bash "./install_advantage.sh"
+else
+  repo_owner="${REPO_OWNER:-JOduMonT}"
+  repo_branch="${REPO_BRANCH:-main}"
+  curl -fsSL "https://raw.githubusercontent.com/${repo_owner}/ubuntu/refs/heads/${repo_branch}/install_advantage.sh" | bash
+fi
 
 pro enable usg
 apt install -y usg

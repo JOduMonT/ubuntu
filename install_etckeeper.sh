@@ -76,13 +76,20 @@ else
 fi
 
 # 6. Fetch .gitignore before first commit so secrets are excluded from the start
-GITIGNORE_URL="https://raw.githubusercontent.com/JOduMonT/ubuntu/refs/heads/main/etc/.gitignore"
-echo "Fetching .gitignore from ${GITIGNORE_URL}..."
-if curl -fsSL "${GITIGNORE_URL}" -o /etc/.gitignore; then
-    echo "✓ .gitignore installed at /etc/.gitignore"
+if [[ -f "./etc/.gitignore" ]]; then
+    cp "./etc/.gitignore" /etc/.gitignore
+    echo "✓ .gitignore copied from local folder"
 else
-    echo "✗ Failed to fetch .gitignore — aborting to avoid committing sensitive files"
-    exit 1
+    repo_owner="${REPO_OWNER:-JOduMonT}"
+    repo_branch="${REPO_BRANCH:-main}"
+    GITIGNORE_URL="https://raw.githubusercontent.com/${repo_owner}/ubuntu/refs/heads/${repo_branch}/etc/.gitignore"
+    echo "Fetching .gitignore from ${GITIGNORE_URL}..."
+    if curl -fsSL "${GITIGNORE_URL}" -o /etc/.gitignore; then
+        echo "✓ .gitignore installed at /etc/.gitignore"
+    else
+        echo "✗ Failed to fetch .gitignore — aborting to avoid committing sensitive files"
+        exit 1
+    fi
 fi
 
 # 7. Initial commit (etckeeper may have already done this on install)

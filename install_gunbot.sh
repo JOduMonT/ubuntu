@@ -4,8 +4,20 @@ set -euo pipefail
 ./bootstrap.sh || exit
 apt install -y unzip
 
-curl -fsSL "https://raw.githubusercontent.com/JOduMonT/ubuntu/refs/heads/main/clean_install.sh" | bash
-curl -fsSL "https://raw.githubusercontent.com/JOduMonT/ubuntu/refs/heads/main/install_nodejs.sh" | bash
+# Helper to execute dependency scripts safely (respects local files, supports custom fork/branch fallback)
+run_script() {
+  local script="$1"
+  if [[ -f "./${script}" ]]; then
+    bash "./${script}"
+  else
+    local repo_owner="${REPO_OWNER:-JOduMonT}"
+    local repo_branch="${REPO_BRANCH:-main}"
+    curl -fsSL "https://raw.githubusercontent.com/${repo_owner}/ubuntu/refs/heads/${repo_branch}/${script}" | bash
+  fi
+}
+
+run_script "clean_install.sh"
+run_script "install_nodejs.sh"
 
 ## Install PM2
 ### ensure to install nodejs before: https://raw.githubusercontent.com/JOduMonT/ubuntu/refs/heads/main/install_nodejs.sh

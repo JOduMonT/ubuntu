@@ -1,0 +1,45 @@
+name: Lint & Code Quality
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  shellcheck:
+    name: ShellCheck & Syntax Validation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Install ShellCheck & shfmt
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y shellcheck shfmt
+
+      - name: Validate Bash Syntax (bash -n)
+        run: |
+          echo "Checking syntax of all shell scripts..."
+          failed=0
+          while IFS= read -r file; do
+            if ! bash -n "$file"; then
+              echo "❌ Syntax error in $file"
+              failed=1
+            fi
+          done < <(find . -maxdepth 1 -name "*.sh")
+          if [ $failed -ne 0 ]; then
+            exit 1
+          fi
+          echo "✨ All scripts passed bash -n syntax checks!"
+
+      - name: Run ShellCheck
+        run: |
+          echo "Running shellcheck..."
+          shellcheck -S error *.sh
+
+      - name: Check Formatting (shfmt)
+        run: |
+          echo "Verifying script formatting style..."
+          shfmt -i 2 -d *.sh

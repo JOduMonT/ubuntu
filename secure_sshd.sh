@@ -3,15 +3,22 @@ set -euo pipefail
 
 SSHD_CONFIG="/etc/ssh/sshd_config"
 BACKUP="${SSHD_CONFIG}.bak.$(date +%Y%m%d%H%M%S)"
-URL="https://raw.githubusercontent.com/JOduMonT/ubuntu/refs/heads/main/etc/ssh/sshd_config"
 
 # Backup current config
 cp "${SSHD_CONFIG}" "${BACKUP}"
 echo "✓ Backup saved to ${BACKUP}"
 
-# Download — fail loudly if it doesn't work
-curl -fsSL "${URL}" -o "${SSHD_CONFIG}"
-echo "✓ Config downloaded"
+if [[ -f "./etc/ssh/sshd_config" ]]; then
+  cp "./etc/ssh/sshd_config" "${SSHD_CONFIG}"
+  echo "✓ Config copied from local folder"
+else
+  repo_owner="${REPO_OWNER:-JOduMonT}"
+  repo_branch="${REPO_BRANCH:-main}"
+  URL="https://raw.githubusercontent.com/${repo_owner}/ubuntu/refs/heads/${repo_branch}/etc/ssh/sshd_config"
+  # Download — fail loudly if it doesn't work
+  curl -fsSL "${URL}" -o "${SSHD_CONFIG}"
+  echo "✓ Config downloaded"
+fi
 
 # Validate before touching the daemon
 sshd -t || {

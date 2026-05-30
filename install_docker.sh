@@ -18,4 +18,10 @@ apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker
 
 # ADD USER Docker
 USER=docker
-curl -fsSL "https://raw.githubusercontent.com/JOduMonT/ubuntu/refs/heads/main/add_superuser.sh"|bash
+if [[ -f "./add_superuser.sh" ]]; then
+  bash "./add_superuser.sh"
+else
+  repo_owner="${REPO_OWNER:-JOduMonT}"
+  repo_branch="${REPO_BRANCH:-main}"
+  curl -fsSL "https://raw.githubusercontent.com/${repo_owner}/ubuntu/refs/heads/${repo_branch}/add_superuser.sh" | bash
+fi

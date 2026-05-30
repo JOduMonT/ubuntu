@@ -4,10 +4,22 @@ set -euo pipefail
 ./bootstrap.sh || exit
 apt install -y jq
 
-curl -fsSL https://raw.githubusercontent.com/JOduMonT/ubuntu/refs/heads/main/clean_install.sh|bash
-curl -fsSL https://raw.githubusercontent.com/JOduMonT/ubuntu/refs/heads/main/install_advantage.sh|bash
-curl -fsSL https://raw.githubusercontent.com/JOduMonT/ubuntu/refs/heads/main/secure_sshd.sh|bash
-curl -fsSL https://raw.githubusercontent.com/JOduMonT/ubuntu/refs/heads/main/install_docker.sh|bash
+# Helper to execute dependency scripts safely (respects local files, supports custom fork/branch fallback)
+run_script() {
+  local script="$1"
+  if [[ -f "./${script}" ]]; then
+    bash "./${script}"
+  else
+    local repo_owner="${REPO_OWNER:-JOduMonT}"
+    local repo_branch="${REPO_BRANCH:-main}"
+    curl -fsSL "https://raw.githubusercontent.com/${repo_owner}/ubuntu/refs/heads/${repo_branch}/${script}" | bash
+  fi
+}
+
+run_script "clean_install.sh"
+run_script "install_advantage.sh"
+run_script "secure_sshd.sh"
+run_script "install_docker.sh"
 
 ## https://docs.dify.ai/en/getting-started/install-self-hosted/docker-compose
 git clone --branch "$(curl -s https://api.github.com/repos/langgenius/dify/releases/latest | jq -r .tag_name)" https://github.com/langgenius/dify.git

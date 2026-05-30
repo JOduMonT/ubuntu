@@ -1,0 +1,6 @@
+# Default owners for all files
+*       @JOduMonT
+
+# Hardening / SSH configurations require double security review
+/etc/ssh/      @JOduMonT
+secure_sshd.sh @JOduMonT
