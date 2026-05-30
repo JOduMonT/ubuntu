@@ -114,7 +114,7 @@ log "Installing filter rules file to $FILTER_DEST..."
 mkdir -p "$FILTER_DEST_DIR"
 cp "$FILTER_SRC" "$FILTER_DEST"
 # Ensure the user owns their rclone configuration folder and files so they can run bisync
-chown -R "$REAL_USER:$REAL_USER" "$FILTER_DEST_DIR"
+chown -R "$REAL_USER:$(id -gn "$REAL_USER")" "$FILTER_DEST_DIR"
 chmod 644 "$FILTER_DEST"
 
 # 5. Install and template systemd unit files

@@ -11,6 +11,8 @@
 + /Music/**
 + /Public/**
 + /Templates/**
++ /RCLONE_TEST
 
 # --- Exclude everything else ---
 - **
+
