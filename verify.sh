@@ -15,16 +15,16 @@
 set -euo pipefail
 
 if [[ $# -lt 2 ]]; then
-    echo "[verify] usage: verify.sh <tool-label> <command>" >&2
-    exit 1
+  echo "[verify] usage: verify.sh <tool-label> <command>" >&2
+  exit 1
 fi
 
 label="$1"; shift
 cmd="$*"
 
 if output=$(bash -c "$cmd" 2>&1); then
-    echo "[verify] OK   $label  → $cmd"
-    return 0 2>/dev/null || exit 0
+  echo "[verify] OK   $label  → $cmd"
+  return 0 2>/dev/null || exit 0
 fi
 
 echo "[verify] FAIL $label  → $cmd" >&2
