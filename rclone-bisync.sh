@@ -64,26 +64,26 @@ DRY_RUN=false
 
 for arg in "$@"; do
   case "$arg" in
-    --resync)
-      MODE="resync"
-      shift
-      ;;
-    --dry-run)
-      DRY_RUN=true
-      shift
-      ;;
-    *)
-      error "Unknown argument: $arg"
-      log "Usage: $0 [--resync] [--dry-run]"
-      exit 1
-      ;;
+  --resync)
+    MODE="resync"
+    shift
+    ;;
+  --dry-run)
+    DRY_RUN=true
+    shift
+    ;;
+  *)
+    error "Unknown argument: $arg"
+    log "Usage: $0 [--resync] [--dry-run]"
+    exit 1
+    ;;
   esac
 done
 
 # --- Check-Access Setup ---
 if [[ "$CHECK_ACCESS" == "true" ]]; then
   LOCAL_TEST_FILE="$LOCAL_DIR/$TEST_FILE_NAME"
-  
+
   if [[ "$MODE" == "resync" ]]; then
     log "Initializing safety test files for check-access..."
     # Create test file locally
@@ -97,7 +97,7 @@ if [[ "$CHECK_ACCESS" == "true" ]]; then
       error "If this is your first run, please run with the --resync flag first."
       exit 1
     fi
-    
+
     # Verify remote safety file exists
     if ! rclone --config "$RCLONE_CONFIG_PATH" lsf "$REMOTE_DIR/$TEST_FILE_NAME" &>/dev/null; then
       error "Remote safety file '$TEST_FILE_NAME' is missing on $REMOTE_DIR."

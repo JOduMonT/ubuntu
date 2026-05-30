@@ -8,8 +8,8 @@ set -euo pipefail
 
 # Ensure script is run as root/sudo
 if [[ $EUID -ne 0 ]]; then
-   echo "[ERROR] This installer must be run as root (or via sudo)." >&2
-   exit 1
+  echo "[ERROR] This installer must be run as root (or via sudo)." >&2
+  exit 1
 fi
 
 ./bootstrap.sh || exit
@@ -20,11 +20,11 @@ error() { echo "[install-rclone] [ERROR] $*" >&2; }
 # Determine the actual non-root user for configuration targeting
 REAL_USER="${SUDO_USER:-$USER}"
 if [[ "$REAL_USER" == "root" ]]; then
-    REAL_USER=$(logname 2>/dev/null || echo "")
-    if [[ -z "$REAL_USER" || "$REAL_USER" == "root" ]]; then
-        # Fallback: get the first regular user from /home directory
-        REAL_USER=$(find /home -maxdepth 1 -mindepth 1 -type d -printf '%f\n' | grep -v 'lost+found' | head -n 1 || echo "root")
-    fi
+  REAL_USER=$(logname 2>/dev/null || echo "")
+  if [[ -z "$REAL_USER" || "$REAL_USER" == "root" ]]; then
+    # Fallback: get the first regular user from /home directory
+    REAL_USER=$(find /home -maxdepth 1 -mindepth 1 -type d -printf '%f\n' | grep -v 'lost+found' | head -n 1 || echo "root")
+  fi
 fi
 
 REAL_HOME=$(eval echo "~$REAL_USER")
@@ -32,20 +32,20 @@ log "Targeting user: $REAL_USER (Home: $REAL_HOME)"
 
 # 1. Install or update Rclone
 if command -v rclone &>/dev/null; then
-    log "rclone is already installed. Attempting update..."
-    # Run official installer but do not crash the script if it fails (e.g. temporary network/DNS issue)
-    if ! curl -fsSL https://rclone.org/install.sh | bash; then
-        log "WARNING: Could not reach update server. Continuing with existing Rclone version: $(rclone --version | head -n 1)"
-    fi
+  log "rclone is already installed. Attempting update..."
+  # Run official installer but do not crash the script if it fails (e.g. temporary network/DNS issue)
+  if ! curl -fsSL https://rclone.org/install.sh | bash; then
+    log "WARNING: Could not reach update server. Continuing with existing Rclone version: $(rclone --version | head -n 1)"
+  fi
 else
-    log "rclone not found. Installing the latest official release..."
-    curl -fsSL https://rclone.org/install.sh | bash
+  log "rclone not found. Installing the latest official release..."
+  curl -fsSL https://rclone.org/install.sh | bash
 fi
 
 # Verify installation success
 if ! command -v rclone &>/dev/null; then
-    error "Rclone installation failed."
-    exit 1
+  error "Rclone installation failed."
+  exit 1
 fi
 log "Rclone successfully installed: $(rclone --version | head -n 1)"
 
@@ -54,8 +54,8 @@ SCRIPT_SRC="./rclone-bisync.sh"
 SCRIPT_DEST="/usr/local/bin/rclone-bisync.sh"
 
 if [[ ! -f "$SCRIPT_SRC" ]]; then
-    error "Source script '$SCRIPT_SRC' not found in the current directory."
-    exit 1
+  error "Source script '$SCRIPT_SRC' not found in the current directory."
+  exit 1
 fi
 
 log "Installing sync wrapper script to $SCRIPT_DEST..."
@@ -65,12 +65,12 @@ chmod +x "$SCRIPT_DEST"
 # 3. Create default configuration file
 DEFAULT_CONF="/etc/default/rclone-bisync"
 if [[ -f "$DEFAULT_CONF" ]]; then
-    log "Backing up existing configuration to ${DEFAULT_CONF}.bak..."
-    cp "$DEFAULT_CONF" "${DEFAULT_CONF}.bak"
+  log "Backing up existing configuration to ${DEFAULT_CONF}.bak..."
+  cp "$DEFAULT_CONF" "${DEFAULT_CONF}.bak"
 fi
 
 log "Writing latest configurations to $DEFAULT_CONF..."
-cat <<EOF > "$DEFAULT_CONF"
+cat <<EOF >"$DEFAULT_CONF"
 # Rclone Bidirectional Sync Configurations
 # Customize these values to match your preferred setup.
 
@@ -106,8 +106,8 @@ FILTER_DEST_DIR="$REAL_HOME/.config/rclone"
 FILTER_DEST="$FILTER_DEST_DIR/rclone-filters.txt"
 
 if [[ ! -f "$FILTER_SRC" ]]; then
-    error "Filter rules source '$FILTER_SRC' not found."
-    exit 1
+  error "Filter rules source '$FILTER_SRC' not found."
+  exit 1
 fi
 
 log "Installing filter rules file to $FILTER_DEST..."
@@ -125,13 +125,13 @@ SERVICE_DEST="/etc/systemd/system/rclone-bisync.service"
 TIMER_DEST="/etc/systemd/system/rclone-bisync.timer"
 
 if [[ ! -f "$SERVICE_SRC" || ! -f "$TIMER_SRC" ]]; then
-    error "Systemd templates not found in etc/systemd/system/."
-    exit 1
+  error "Systemd templates not found in etc/systemd/system/."
+  exit 1
 fi
 
 log "Installing systemd configurations..."
 # Template the service file with the actual username and home directory
-sed "s/__USER__/$REAL_USER/g" "$SERVICE_SRC" > "$SERVICE_DEST"
+sed "s/__USER__/$REAL_USER/g" "$SERVICE_SRC" >"$SERVICE_DEST"
 chmod 644 "$SERVICE_DEST"
 
 # Copy the timer file directly

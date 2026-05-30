@@ -16,4 +16,4 @@ run_script() {
 }
 
 run_script "clean_install.sh"
-curl -fsSL https://cloudron.io/cloudron-setup|bash
+curl -fsSL https://cloudron.io/cloudron-setup | bash

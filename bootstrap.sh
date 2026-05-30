@@ -25,6 +25,6 @@ apt-get update -qq
 
 log "ensuring curl + ca-certificates"
 DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-    curl ca-certificates >/dev/null
+  curl ca-certificates >/dev/null
 
 log "ready"

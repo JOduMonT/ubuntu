@@ -21,8 +21,8 @@ error() { echo -e "${RED}[install-blowfish-tools] [ERROR]${NC} ❌ $*" >&2; }
 
 # Ensure script is run as root/sudo
 if [[ $EUID -ne 0 ]]; then
-   error "This installer must be run as root (or via sudo)."
-   exit 1
+  error "This installer must be run as root (or via sudo)."
+  exit 1
 fi
 
 # Invoke bootstrap sequence to ensure base tools are ready
@@ -34,27 +34,27 @@ node_installed=false
 
 log "Checking Node.js & npm requirement..."
 if command -v node &>/dev/null && command -v npm &>/dev/null; then
-    node_ver=$(node --version | sed 's/^v//' || echo "")
-    if [[ -n "$node_ver" ]]; then
-        log "Found existing Node.js version: $node_ver"
-        if [ "$(printf '%s\n%s' "$MIN_NODE_VER" "$node_ver" | sort -V | head -n 1)" == "$MIN_NODE_VER" ]; then
-            node_installed=true
-            success "Existing Node.js version $node_ver satisfies requirement >= $MIN_NODE_VER."
-        else
-            warn "Existing Node.js version is too low ($node_ver < $MIN_NODE_VER)."
-        fi
+  node_ver=$(node --version | sed 's/^v//' || echo "")
+  if [[ -n "$node_ver" ]]; then
+    log "Found existing Node.js version: $node_ver"
+    if [ "$(printf '%s\n%s' "$MIN_NODE_VER" "$node_ver" | sort -V | head -n 1)" == "$MIN_NODE_VER" ]; then
+      node_installed=true
+      success "Existing Node.js version $node_ver satisfies requirement >= $MIN_NODE_VER."
+    else
+      warn "Existing Node.js version is too low ($node_ver < $MIN_NODE_VER)."
     fi
+  fi
 fi
 
 if [ "$node_installed" = false ]; then
-    log "Invoking install_nodejs.sh to set up Node.js..."
-    if [[ -f "./install_nodejs.sh" ]]; then
-        ./install_nodejs.sh || exit
-        success "Node.js successfully configured."
-    else
-        error "Could not find ./install_nodejs.sh in the current directory."
-        exit 1
-    fi
+  log "Invoking install_nodejs.sh to set up Node.js..."
+  if [[ -f "./install_nodejs.sh" ]]; then
+    ./install_nodejs.sh || exit
+    success "Node.js successfully configured."
+  else
+    error "Could not find ./install_nodejs.sh in the current directory."
+    exit 1
+  fi
 fi
 
 # 2. Verify Hugo Dependency
@@ -62,19 +62,19 @@ hugo_installed=false
 
 log "Checking Hugo Extended requirement..."
 if command -v hugo &>/dev/null; then
-    hugo_installed=true
-    success "Hugo Extended is already installed."
+  hugo_installed=true
+  success "Hugo Extended is already installed."
 fi
 
 if [ "$hugo_installed" = false ]; then
-    log "Invoking install_hugo.sh to configure Hugo Extended..."
-    if [[ -f "./install_hugo.sh" ]]; then
-        ./install_hugo.sh || exit
-        success "Hugo Extended successfully configured."
-    else
-        error "Could not find ./install_hugo.sh in the current directory."
-        exit 1
-    fi
+  log "Invoking install_hugo.sh to configure Hugo Extended..."
+  if [[ -f "./install_hugo.sh" ]]; then
+    ./install_hugo.sh || exit
+    success "Hugo Extended successfully configured."
+  else
+    error "Could not find ./install_hugo.sh in the current directory."
+    exit 1
+  fi
 fi
 
 # 3. Install blowfish-tools Globally
@@ -84,10 +84,10 @@ npm install -g blowfish-tools
 
 # Confirm command is in path
 if command -v blowfish-tools &>/dev/null; then
-    success "blowfish-tools successfully installed in path."
+  success "blowfish-tools successfully installed in path."
 else
-    # Fallback/dynamic wrapper warning
-    warn "blowfish-tools package installed globally, but command was not immediately found in active PATH."
+  # Fallback/dynamic wrapper warning
+  warn "blowfish-tools package installed globally, but command was not immediately found in active PATH."
 fi
 
 # 4. Beautiful Success Card

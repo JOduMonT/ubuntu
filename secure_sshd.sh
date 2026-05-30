@@ -22,9 +22,9 @@ fi
 
 # Validate before touching the daemon
 sshd -t || {
-    echo "✗ Config invalid — restoring backup"
-    cp "${BACKUP}" "${SSHD_CONFIG}"
-    exit 1
+  echo "✗ Config invalid — restoring backup"
+  cp "${BACKUP}" "${SSHD_CONFIG}"
+  exit 1
 }
 echo "✓ Config valid"
 
@@ -37,5 +37,5 @@ echo "  Test login in a NEW terminal before closing this session."
 
 # Post-install assertion (best-effort — non-fatal if verify.sh is absent)
 if [[ -x ./verify.sh ]]; then
-    ./verify.sh sshd "sshd -t" || true
+  ./verify.sh sshd "sshd -t" || true
 fi

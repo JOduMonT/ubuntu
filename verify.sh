@@ -19,7 +19,8 @@ if [[ $# -lt 2 ]]; then
   exit 1
 fi
 
-label="$1"; shift
+label="$1"
+shift
 cmd="$*"
 
 if output=$(bash -c "$cmd" 2>&1); then

@@ -8,9 +8,8 @@ cp -r /root/.ssh /home/${USER:-rescue}/
 chown -R ${USER:-rescue}: /home/${USER:-rescue}/.ssh
 
 usermod -aG sudo ${USER:-rescue}
-echo "${USER:-rescue} ALL=(ALL) NOPASSWD:ALL" > "/etc/sudoers.d/90-${USER:-rescue}-users"
-
+echo "${USER:-rescue} ALL=(ALL) NOPASSWD:ALL" >"/etc/sudoers.d/90-${USER:-rescue}-users"
 
 # ENABLE BYOBU
 sudo -nu ${USER:-rescue} byobu-enable
-sudo -nu ${USER:-rescue} echo "set -sg escape-time 50" > /home/${USER:-rescue}/.config/byobu/.tmux.conf
+sudo -nu ${USER:-rescue} echo "set -sg escape-time 50" >/home/${USER:-rescue}/.config/byobu/.tmux.conf

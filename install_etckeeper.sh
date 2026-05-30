@@ -23,10 +23,10 @@ apt install -y etckeeper
 
 # 2. Enable auto-push (only patch if not already set)
 if grep -q '^PUSH_REMOTE=""' /etc/etckeeper/etckeeper.conf; then
-    sed -i 's/^PUSH_REMOTE=""/PUSH_REMOTE="origin"/' /etc/etckeeper/etckeeper.conf
-    echo "✓ PUSH_REMOTE set to origin"
+  sed -i 's/^PUSH_REMOTE=""/PUSH_REMOTE="origin"/' /etc/etckeeper/etckeeper.conf
+  echo "✓ PUSH_REMOTE set to origin"
 else
-    echo "! PUSH_REMOTE already configured — check /etc/etckeeper/etckeeper.conf manually"
+  echo "! PUSH_REMOTE already configured — check /etc/etckeeper/etckeeper.conf manually"
 fi
 
 # 3. Generate a dedicated SSH deploy key (no passphrase; used by root in cron)
@@ -56,7 +56,7 @@ chmod 700 /root/.ssh
 # Remove any existing etckeeper block to avoid duplicates
 sed -i '/^# etckeeper-deploy$/,/^$/d' "${SSH_CONFIG}" 2>/dev/null || true
 
-cat >> "${SSH_CONFIG}" <<EOF
+cat >>"${SSH_CONFIG}" <<EOF
 
 # etckeeper-deploy
 Host github-etckeeper
@@ -70,50 +70,50 @@ chmod 600 "${SSH_CONFIG}"
 # 5. Test the SSH connection
 echo "Testing SSH connection..."
 if ssh -T git@github-etckeeper 2>&1 | grep -q "successfully authenticated"; then
-    echo "✓ SSH connection successful"
+  echo "✓ SSH connection successful"
 else
-    echo "! SSH test returned above — if you see 'successfully authenticated' it's fine"
+  echo "! SSH test returned above — if you see 'successfully authenticated' it's fine"
 fi
 
 # 6. Fetch .gitignore before first commit so secrets are excluded from the start
 if [[ -f "./etc/.gitignore" ]]; then
-    cp "./etc/.gitignore" /etc/.gitignore
-    echo "✓ .gitignore copied from local folder"
+  cp "./etc/.gitignore" /etc/.gitignore
+  echo "✓ .gitignore copied from local folder"
 else
-    repo_owner="${REPO_OWNER:-JOduMonT}"
-    repo_branch="${REPO_BRANCH:-main}"
-    GITIGNORE_URL="https://raw.githubusercontent.com/${repo_owner}/ubuntu/refs/heads/${repo_branch}/etc/.gitignore"
-    echo "Fetching .gitignore from ${GITIGNORE_URL}..."
-    if curl -fsSL "${GITIGNORE_URL}" -o /etc/.gitignore; then
-        echo "✓ .gitignore installed at /etc/.gitignore"
-    else
-        echo "✗ Failed to fetch .gitignore — aborting to avoid committing sensitive files"
-        exit 1
-    fi
+  repo_owner="${REPO_OWNER:-JOduMonT}"
+  repo_branch="${REPO_BRANCH:-main}"
+  GITIGNORE_URL="https://raw.githubusercontent.com/${repo_owner}/ubuntu/refs/heads/${repo_branch}/etc/.gitignore"
+  echo "Fetching .gitignore from ${GITIGNORE_URL}..."
+  if curl -fsSL "${GITIGNORE_URL}" -o /etc/.gitignore; then
+    echo "✓ .gitignore installed at /etc/.gitignore"
+  else
+    echo "✗ Failed to fetch .gitignore — aborting to avoid committing sensitive files"
+    exit 1
+  fi
 fi
 
 # 7. Initial commit (etckeeper may have already done this on install)
 if ! git -C /etc log --oneline -1 &>/dev/null; then
-    etckeeper init
-    etckeeper commit "initial commit"
-    echo "✓ Initial commit created"
+  etckeeper init
+  etckeeper commit "initial commit"
+  echo "✓ Initial commit created"
 else
-    echo "✓ etckeeper already has commits"
+  echo "✓ etckeeper already has commits"
 fi
 
 # 8. Add remote using the SSH alias (no token, no plaintext creds)
 if git -C /etc remote get-url origin &>/dev/null; then
-    echo "! Remote 'origin' already exists:"
-    git -C /etc remote get-url origin
-    echo "  Remove it first with: etckeeper vcs remote remove origin"
+  echo "! Remote 'origin' already exists:"
+  git -C /etc remote get-url origin
+  echo "  Remove it first with: etckeeper vcs remote remove origin"
 else
-    etckeeper vcs remote add origin "git@github-etckeeper:${USERNAME}/${REPO}.git"
-    echo "✓ Remote added"
+  etckeeper vcs remote add origin "git@github-etckeeper:${USERNAME}/${REPO}.git"
+  echo "✓ Remote added"
 fi
 
 # 9. Initial push
-etckeeper vcs push -u origin main \
-    || etckeeper vcs push -u origin master  # fallback for older git default
+etckeeper vcs push -u origin main ||
+  etckeeper vcs push -u origin master # fallback for older git default
 
 echo ""
 echo "✓ Done. etckeeper will now auto-push to github on apt operations."
@@ -122,5 +122,5 @@ echo "  SSH alias:        github-etckeeper → github.com"
 
 # Post-install assertion (best-effort — non-fatal if verify.sh is absent)
 if [[ -x ./verify.sh ]]; then
-    ./verify.sh etckeeper "etckeeper --version" || true
+  ./verify.sh etckeeper "etckeeper --version" || true
 fi

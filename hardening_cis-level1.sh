@@ -20,6 +20,9 @@ usg audit --tailoring-file hardening.xml
 # disable services, or otherwise leave the box unbootable. NEVER run it
 # unattended. Audit output above lists what `fix` would actually change.
 read -rp "About to run usg fix — this can lock you out. Continue? [yN] " ans
-[[ "${ans,,}" == "y" ]] || { echo "Aborted before usg fix."; exit 1; }
+[[ "${ans,,}" == "y" ]] || {
+  echo "Aborted before usg fix."
+  exit 1
+}
 
 usg fix --tailoring-file hardening.xml
