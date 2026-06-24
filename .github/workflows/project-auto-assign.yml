@@ -1,0 +1,44 @@
+name: Auto Assign Issues and PRs
+
+on:
+  issues:
+    types: [opened]
+  pull_request:
+    types: [opened]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  issues: write
+  pull-requests: write
+
+jobs:
+  auto-assign:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Assign Owner
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          EVENT_NAME: ${{ github.event_name }}
+        run: |
+          if [ "$EVENT_NAME" = "issues" ]; then
+            ASSIGNEES_COUNT=$(gh issue view "$ISSUE_NUMBER" --json assignees --jq '.assignees | length')
+            if [ "$ASSIGNEES_COUNT" -eq 0 ]; then
+              echo "Assigning issue #$ISSUE_NUMBER to JOduMonT..."
+              gh issue edit "$ISSUE_NUMBER" --add-assignee "JOduMonT"
+            else
+              echo "Issue #$ISSUE_NUMBER is already assigned."
+            fi
+          else
+            ASSIGNEES_COUNT=$(gh pr view "$PR_NUMBER" --json assignees --jq '.assignees | length')
+            if [ "$ASSIGNEES_COUNT" -eq 0 ]; then
+              echo "Assigning PR #$PR_NUMBER to JOduMonT..."
+              gh pr edit "$PR_NUMBER" --add-assignee "JOduMonT"
+            else
+              echo "PR #$PR_NUMBER is already assigned."
+            fi
+          fi

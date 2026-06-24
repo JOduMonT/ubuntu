@@ -1,0 +1,94 @@
+name: Stale Project Card Monitor
+
+on:
+  schedule:
+    - cron: '0 8 * * 1' # Run every Monday at 8:00 AM UTC
+  workflow_dispatch: # Allow manual trigger
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  monitor-cards:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Scan Project Board for Stale Cards
+        env:
+          GITHUB_TOKEN: ${{ secrets.ADD_TO_PROJECT_PAT }} # PAT needed for project-list and issue commenting if multi-repo
+        run: |
+          python3 -c "
+          import json
+          import subprocess
+          import datetime
+          import sys
+
+          def run_cmd(args):
+              res = subprocess.run(args, capture_output=True, text=True)
+              if res.returncode != 0:
+                  print(f'Error executing command: {\" \".join(args)}')
+                  print(res.stderr)
+                  return None
+              return res.stdout.strip()
+
+          print('Fetching items from Project #34...')
+          items_data = run_cmd(['gh', 'project', 'item-list', '34', '--owner', 'JOduMonT', '--format', 'json'])
+          if not items_data:
+              print('Failed to retrieve project items.')
+              sys.exit(1)
+
+          items = json.loads(items_data).get('items', [])
+          now = datetime.datetime.now(datetime.timezone.utc)
+          stale_threshold = datetime.timedelta(days=14)
+
+          for item in items:
+              status = item.get('status')
+              content = item.get('content', {})
+              item_type = content.get('type')
+              url = content.get('url')
+              title = content.get('title')
+
+              # We only monitor issues that are in 'Todo' or 'In Progress' states
+              if item_type == 'Issue' and status in ['Todo', 'In Progress']:
+                  print(f'Checking Issue: {title} ({status})')
+                  
+                  # Extract repo and issue number from URL
+                  # e.g., https://github.com/JOduMonT/Public/issues/1
+                  parts = url.split('/')
+                  repo_ref = f'{parts[-4]}/{parts[-3]}'
+                  issue_num = parts[-1]
+
+                  issue_data = run_cmd(['gh', 'issue', 'view', url, '--json', 'updatedAt,state', '--repo', repo_ref])
+                  if not issue_data:
+                      continue
+
+                  issue_info = json.loads(issue_data)
+                  updated_at_str = issue_info.get('updatedAt')
+                  state = issue_info.get('state')
+
+                  if state != 'OPEN':
+                      continue
+
+                  # Parse date (format: '2026-06-05T19:08:14Z')
+                  updated_at = datetime.datetime.strptime(updated_at_str, '%Y-%m-%dT%H:%M:%SZ').replace(tzinfo=datetime.timezone.utc)
+                  age = now - updated_at
+
+                  if age > stale_threshold:
+                      print(f'⚠️ Issue #{issue_num} is stale! Last updated {age.days} days ago.')
+                      
+                      comment_body = (
+                          f'⚠️ **Stale Project Card Alert** ⚠️\n\n'
+                          f'This card has been in the **{status}** column of the project board '
+                          f'for {age.days} days without updates. Please review this task, update the progress, '
+                          f'or move it to another column if it is blocked.'
+                      )
+                      
+                      # Post comment to issue
+                      comment_res = run_cmd(['gh', 'issue', 'comment', url, '--body', comment_body])
+                      if comment_res is not None:
+                          print(f'   Comment posted successfully.')
+          "

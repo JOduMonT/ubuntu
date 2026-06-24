@@ -1,0 +1,26 @@
+# Secrets & Local Configurations
+.env
+*.local
+credentials.json
+token.json
+
+# IDEs & System Files
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+env/
+venv/
+
+# Node.js
+node_modules/
+dist/
+build/
+.next/
+.hugo_build.lock

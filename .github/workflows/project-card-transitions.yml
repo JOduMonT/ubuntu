@@ -1,0 +1,72 @@
+name: Project Board Status Transitions
+
+on:
+  issues:
+    types: [opened, closed, reopened]
+  pull_request:
+    types: [opened, closed, reopened]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  transition-status:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Update Card Status in Project Board
+        env:
+          GITHUB_TOKEN: ${{ secrets.ADD_TO_PROJECT_PAT }} # Needs PAT for user-level project edits
+          EVENT_NAME: ${{ github.event_name }}
+          ACTION: ${{ github.event.action }}
+        run: |
+          # 1. Determine trigger URL
+          if [ "$EVENT_NAME" = "issues" ]; then
+            URL="${{ github.event.issue.html_url }}"
+          else
+            URL="${{ github.event.pull_request.html_url }}"
+          fi
+          
+          echo "Processing URL: $URL"
+          
+          # 2. Determine target status option ID
+          # Todo: f75ad846 | In Progress: 47fc9ee4 | Done: 98236657
+          if [ "$ACTION" = "closed" ]; then
+            OPTION_ID="98236657" # Done
+            STATUS_NAME="Done"
+          elif [ "$ACTION" = "opened" ] || [ "$ACTION" = "reopened" ]; then
+            OPTION_ID="47fc9ee4" # In Progress
+            STATUS_NAME="In Progress"
+          else
+            echo "No status transition needed for action: $ACTION"
+            exit 0
+          fi
+          
+          echo "Target status: $STATUS_NAME ($OPTION_ID)"
+          
+          # 3. Find item ID in Project #34
+          echo "Retrieving project items..."
+          ITEMS_JSON=$(gh project item-list 34 --owner JOduMonT --format json)
+          ITEM_ID=$(echo "$ITEMS_JSON" | jq -r --arg url "$URL" '.items[] | select(.content.url == $url) | .id')
+          
+          if [ -z "$ITEM_ID" ] || [ "$ITEM_ID" = "null" ]; then
+            echo "⚠️ Warning: Card for $URL not found in Project #34. Attempting to add it first."
+            # Try to add it
+            ADD_OUT=$(gh project item-add 34 --owner JOduMonT --url "$URL" --format json)
+            ITEM_ID=$(echo "$ADD_OUT" | jq -r '.id')
+            if [ -z "$ITEM_ID" ] || [ "$ITEM_ID" = "null" ]; then
+              echo "❌ Error: Could not find or add item to Project."
+              exit 1
+            fi
+            echo "Added card with ID: $ITEM_ID"
+          else
+            echo "Found card with ID: $ITEM_ID"
+          fi
+          
+          # 4. Update the item's Status field
+          echo "Transitioning item status..."
+          gh project item-edit 34 --owner JOduMonT --id "$ITEM_ID" --field-id "PVTSSF_lAHOAE9q9M4BZ17qzhUxzTU" --single-select-option-id "$OPTION_ID"
+          echo "✅ Successfully updated card status to $STATUS_NAME."

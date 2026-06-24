@@ -1,0 +1,26 @@
+name: Add Issues and PRs to Project Board
+
+on:
+  issues:
+    types: [opened]
+  pull_request:
+    types: [opened]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  add-to-project:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Add to Project Board
+        uses: actions/add-to-project@f6a9c17ee1a8f9c15b1279f225d3b664d4ec62b0 # v1.0.1
+        with:
+          project-url: https://github.com/users/JOduMonT/projects/34
+          # Note: A personal access token (PAT) with 'project' scope is required
+          # because the default GITHUB_TOKEN doesn't support user-level projects.
+          github-token: ${{ secrets.ADD_TO_PROJECT_PAT }}
