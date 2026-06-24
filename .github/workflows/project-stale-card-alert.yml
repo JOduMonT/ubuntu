@@ -35,8 +35,8 @@ jobs:
                   return None
               return res.stdout.strip()
 
-          print('Fetching items from Project #34...')
-          items_data = run_cmd(['gh', 'project', 'item-list', '34', '--owner', 'JOduMonT', '--format', 'json'])
+          print('Fetching items from Project #35...')
+          items_data = run_cmd(['gh', 'project', 'item-list', '35', '--owner', 'JOduMonT', '--format', 'json'])
           if not items_data:
               print('Failed to retrieve project items.')
               sys.exit(1)

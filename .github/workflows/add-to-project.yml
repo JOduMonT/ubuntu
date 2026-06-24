@@ -20,7 +20,7 @@ jobs:
       - name: Add to Project Board
         uses: actions/add-to-project@f6a9c17ee1a8f9c15b1279f225d3b664d4ec62b0 # v1.0.1
         with:
-          project-url: https://github.com/users/JOduMonT/projects/34
+          project-url: https://github.com/users/JOduMonT/projects/35
           # Note: A personal access token (PAT) with 'project' scope is required
           # because the default GITHUB_TOKEN doesn't support user-level projects.
           github-token: ${{ secrets.ADD_TO_PROJECT_PAT }}

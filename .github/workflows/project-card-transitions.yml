@@ -47,15 +47,15 @@ jobs:
           
           echo "Target status: $STATUS_NAME ($OPTION_ID)"
           
-          # 3. Find item ID in Project #34
+          # 3. Find item ID in Project #35
           echo "Retrieving project items..."
-          ITEMS_JSON=$(gh project item-list 34 --owner JOduMonT --format json)
+          ITEMS_JSON=$(gh project item-list 35 --owner JOduMonT --format json)
           ITEM_ID=$(echo "$ITEMS_JSON" | jq -r --arg url "$URL" '.items[] | select(.content.url == $url) | .id')
           
           if [ -z "$ITEM_ID" ] || [ "$ITEM_ID" = "null" ]; then
-            echo "⚠️ Warning: Card for $URL not found in Project #34. Attempting to add it first."
+            echo "⚠️ Warning: Card for $URL not found in Project #35. Attempting to add it first."
             # Try to add it
-            ADD_OUT=$(gh project item-add 34 --owner JOduMonT --url "$URL" --format json)
+            ADD_OUT=$(gh project item-add 35 --owner JOduMonT --url "$URL" --format json)
             ITEM_ID=$(echo "$ADD_OUT" | jq -r '.id')
             if [ -z "$ITEM_ID" ] || [ "$ITEM_ID" = "null" ]; then
               echo "❌ Error: Could not find or add item to Project."
@@ -68,5 +68,5 @@ jobs:
           
           # 4. Update the item's Status field
           echo "Transitioning item status..."
-          gh project item-edit 34 --owner JOduMonT --id "$ITEM_ID" --field-id "PVTSSF_lAHOAE9q9M4BZ17qzhUxzTU" --single-select-option-id "$OPTION_ID"
+          gh project item-edit 35 --owner JOduMonT --id "$ITEM_ID" --field-id "PVTSSF_lAHOAE9q9M4BbXwnzhWItsI" --single-select-option-id "$OPTION_ID"
           echo "✅ Successfully updated card status to $STATUS_NAME."
