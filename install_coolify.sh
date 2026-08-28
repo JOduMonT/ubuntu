@@ -16,7 +16,6 @@ run_script() {
   fi
 }
 
-run_script "clean_install.sh"
 run_script "install_advantage.sh"
 run_script "secure_sshd.sh"
 
