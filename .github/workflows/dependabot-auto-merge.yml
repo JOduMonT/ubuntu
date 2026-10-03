@@ -1,6 +1,6 @@
 name: Dependabot auto-merge
 
-# Squash-merges a Dependabot pull request once every other check on it has passed.
+# Rebase-merges a Dependabot pull request once every other check on it has passed.
 # Major version bumps are left open for review. Branch protection is not available on the
 # GitHub Free plan, so the wait-for-checks gate lives in this job instead of in a ruleset.
 
@@ -48,4 +48,4 @@ jobs:
             [ "$SECONDS" -gt "$deadline" ] && { echo "Timed out waiting for checks."; exit 1; }
             sleep 30
           done
-          gh pr merge --squash --delete-branch "$PR_URL"
+          gh pr merge --rebase --delete-branch "$PR_URL"
