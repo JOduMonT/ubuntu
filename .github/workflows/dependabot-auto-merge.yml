@@ -1,0 +1,51 @@
+name: Dependabot auto-merge
+
+# Squash-merges a Dependabot pull request once every other check on it has passed.
+# Major version bumps are left open for review. Branch protection is not available on the
+# GitHub Free plan, so the wait-for-checks gate lives in this job instead of in a ruleset.
+
+on:
+  pull_request:
+
+permissions:
+  contents: write
+  pull-requests: write
+  checks: read
+
+jobs:
+  auto-merge:
+    name: auto-merge
+    if: github.event.pull_request.user.login == 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - name: Read Dependabot metadata
+        id: meta
+        uses: dependabot/fetch-metadata@25dd0e34f4fe68f24cc83900b1fe3fe149efef98 # v3.1.0
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Wait for the other checks, then merge
+        if: steps.meta.outputs.update-type != 'version-update:semver-major'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          SHA: ${{ github.event.pull_request.head.sha }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+        run: |
+          set -eu
+          sleep 60  # let the other workflows register their checks
+          deadline=$((SECONDS + 1800))
+          while :; do
+            runs=$(gh api "repos/$REPO/commits/$SHA/check-runs?per_page=100" \
+              --jq '[.check_runs[] | select(.name != "auto-merge") | {name, status, conclusion}]')
+            bad=$(echo "$runs" | jq '[.[] | select(.status == "completed" and (.conclusion | IN("success", "neutral", "skipped") | not))] | length')
+            pending=$(echo "$runs" | jq '[.[] | select(.status != "completed")] | length')
+            if [ "$bad" -gt 0 ]; then
+              echo "A check failed; not merging."; echo "$runs" | jq .; exit 1
+            fi
+            [ "$pending" -eq 0 ] && break
+            [ "$SECONDS" -gt "$deadline" ] && { echo "Timed out waiting for checks."; exit 1; }
+            sleep 30
+          done
+          gh pr merge --squash --delete-branch "$PR_URL"
